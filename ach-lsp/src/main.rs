@@ -1,4 +1,6 @@
 mod backend;
+mod document;
+mod hover;
 
 use backend::Backend;
 use tower_lsp_server::{LspService, Server};

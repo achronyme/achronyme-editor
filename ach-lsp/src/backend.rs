@@ -1,13 +1,19 @@
+use crate::document::{self, DocumentStore};
+use crate::hover;
 use tower_lsp_server::ls_types::*;
 use tower_lsp_server::{Client, LanguageServer};
 
 pub struct Backend {
     client: Client,
+    documents: DocumentStore,
 }
 
 impl Backend {
     pub fn new(client: Client) -> Self {
-        Self { client }
+        Self {
+            client,
+            documents: DocumentStore::new(),
+        }
     }
 
     async fn publish_diagnostics_for(&self, uri: Uri, text: &str) {
@@ -16,7 +22,6 @@ impl Backend {
             Err(e) => {
                 let line = e.line.saturating_sub(1) as u32;
                 let col = e.col.saturating_sub(1) as u32;
-                // Mark from error column to end of the offending line.
                 let end_col = text
                     .lines()
                     .nth(line as usize)
@@ -52,6 +57,7 @@ impl LanguageServer for Backend {
                 text_document_sync: Some(TextDocumentSyncCapability::Kind(
                     TextDocumentSyncKind::FULL,
                 )),
+                hover_provider: Some(HoverProviderCapability::Simple(true)),
                 ..Default::default()
             },
             server_info: Some(ServerInfo {
@@ -72,22 +78,56 @@ impl LanguageServer for Backend {
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        self.publish_diagnostics_for(params.text_document.uri, &params.text_document.text)
-            .await;
+        let uri = params.text_document.uri;
+        let text = params.text_document.text;
+        self.documents.open(&uri.to_string(), text.clone());
+        self.publish_diagnostics_for(uri, &text).await;
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        // FULL sync: the last content change contains the entire document.
         if let Some(change) = params.content_changes.into_iter().last() {
-            self.publish_diagnostics_for(params.text_document.uri, &change.text)
-                .await;
+            let uri = params.text_document.uri;
+            self.documents.update(&uri.to_string(), change.text.clone());
+            self.publish_diagnostics_for(uri, &change.text).await;
         }
     }
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
-        // Clear diagnostics when the file is closed.
+        self.documents.close(&params.text_document.uri.to_string());
         self.client
             .publish_diagnostics(params.text_document.uri, vec![], None)
             .await;
+    }
+
+    async fn hover(&self, params: HoverParams) -> tower_lsp_server::jsonrpc::Result<Option<Hover>> {
+        let uri = params
+            .text_document_position_params
+            .text_document
+            .uri
+            .to_string();
+        let pos = params.text_document_position_params.position;
+
+        let text = match self.documents.get(&uri) {
+            Some(t) => t,
+            None => return Ok(None),
+        };
+
+        let (word, range) = match document::word_at_position(&text, pos.line, pos.character) {
+            Some(w) => w,
+            None => return Ok(None),
+        };
+
+        let doc = match hover::hover_for(&word) {
+            Some(d) => d,
+            None => return Ok(None),
+        };
+
+        Ok(Some(Hover {
+            contents: HoverContents::Markup(MarkupContent {
+                kind: MarkupKind::Markdown,
+                value: doc.to_string(),
+            }),
+            range: Some(range),
+        }))
     }
 }
