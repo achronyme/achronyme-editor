@@ -1,3 +1,4 @@
+use crate::completion;
 use crate::document::{self, DocumentStore};
 use crate::hover;
 use tower_lsp_server::ls_types::*;
@@ -58,6 +59,7 @@ impl LanguageServer for Backend {
                     TextDocumentSyncKind::FULL,
                 )),
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
+                completion_provider: Some(CompletionOptions::default()),
                 ..Default::default()
             },
             server_info: Some(ServerInfo {
@@ -129,5 +131,14 @@ impl LanguageServer for Backend {
             }),
             range: Some(range),
         }))
+    }
+
+    async fn completion(
+        &self,
+        _: CompletionParams,
+    ) -> tower_lsp_server::jsonrpc::Result<Option<CompletionResponse>> {
+        let mut items = completion::keyword_completions();
+        items.extend(completion::snippet_completions());
+        Ok(Some(CompletionResponse::Array(items)))
     }
 }

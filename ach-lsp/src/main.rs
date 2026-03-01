@@ -1,4 +1,5 @@
 mod backend;
+mod completion;
 mod document;
 mod hover;
 
