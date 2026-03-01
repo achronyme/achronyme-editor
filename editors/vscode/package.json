@@ -39,7 +39,22 @@
         "scopeName": "source.ach",
         "path": "./syntaxes/achronyme.tmLanguage.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Achronyme",
+      "properties": {
+        "achronyme.executablePath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Achronyme CLI (ach) binary. Leave empty to use the bundled or auto-downloaded binary."
+        },
+        "achronyme.lspPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Achronyme Language Server (ach-lsp) binary. Leave empty to use the bundled binary."
+        }
+      }
+    }
   },
   "scripts": {
     "build": "node esbuild.mjs",

@@ -9,10 +9,11 @@ import {
   LanguageClientOptions,
   ServerOptions,
 } from "vscode-languageclient/node";
+import { ensureAchBinary } from "./download";
 
 let client: LanguageClient | undefined;
 
-export function activate(context: ExtensionContext): void {
+export async function activate(context: ExtensionContext): Promise<void> {
   // Look for the ach-lsp binary:
   // 1. User-configured path
   // 2. Bundled in the extension's bin/ directory
@@ -44,6 +45,9 @@ export function activate(context: ExtensionContext): void {
       `ach-lsp failed to start: ${err}. Install it with: cargo install --path ach-lsp`,
     );
   });
+
+  // Check for ach CLI binary (non-blocking)
+  ensureAchBinary().catch(() => {});
 }
 
 export function deactivate(): Thenable<void> | undefined {
