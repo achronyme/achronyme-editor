@@ -4,11 +4,13 @@
   "scopeName": "source.ach",
   "patterns": [
     { "include": "#comments" },
+    { "include": "#import-statement" },
     { "include": "#strings" },
     { "include": "#constants" },
     { "include": "#numbers" },
     { "include": "#keywords" },
     { "include": "#function-definition" },
+    { "include": "#builtins" },
     { "include": "#function-call" },
     { "include": "#operators" },
     { "include": "#punctuation" }
@@ -24,6 +26,23 @@
           "name": "comment.block.ach",
           "begin": "/\\*",
           "end": "\\*/"
+        }
+      ]
+    },
+    "import-statement": {
+      "patterns": [
+        {
+          "match": "\\b(import)\\s+(\"[^\"]*\")\\s+(as)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.control.import.ach" },
+            "2": { "name": "string.quoted.double.ach" },
+            "3": { "name": "keyword.control.as.ach" },
+            "4": { "name": "entity.name.namespace.ach" }
+          }
+        },
+        {
+          "match": "\\b(export)\\b",
+          "name": "keyword.control.export.ach"
         }
       ]
     },
@@ -75,10 +94,14 @@
         {
           "name": "keyword.other.ach",
           "match": "\\b(let|mut|fn|public|witness|prove)\\b"
-        },
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
         {
           "name": "support.function.builtin.ach",
-          "match": "\\b(print)\\b"
+          "match": "\\b(print|len|typeof|assert|time|push|pop|keys|proof_json|proof_public|proof_vkey|substring|indexOf|split|trim|replace|toUpper|toLower|chars|poseidon|poseidon_many|verify_proof|bigint256|bigint512|to_bits|from_bits|bit_and|bit_or|bit_xor|bit_not|bit_shl|bit_shr)\\b(?=\\s*\\()"
         }
       ]
     },
