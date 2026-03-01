@@ -5,7 +5,9 @@ Cargo.lock
 # Node
 node_modules/
 editors/vscode/out/
+editors/vscode/bin/
 editors/vscode/*.vsix
+*.vsix
 
 # IDE
 .vscode/

@@ -1,0 +1,137 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            vsce_target: linux-x64
+            artifact: ach-lsp-linux-x64
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            vsce_target: darwin-x64
+            artifact: ach-lsp-darwin-x64
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            vsce_target: darwin-arm64
+            artifact: ach-lsp-darwin-arm64
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            vsce_target: win32-x64
+            artifact: ach-lsp-win32-x64.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build -p ach-lsp --release --target ${{ matrix.target }}
+
+      - name: Rename binary (unix)
+        if: runner.os != 'Windows'
+        run: mv target/${{ matrix.target }}/release/ach-lsp ${{ matrix.artifact }}
+
+      - name: Rename binary (windows)
+        if: runner.os == 'Windows'
+        run: mv target/${{ matrix.target }}/release/ach-lsp.exe ${{ matrix.artifact }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  package:
+    name: Package VSIX
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: editors/vscode
+        run: npm ci
+
+      - name: Build extension
+        working-directory: editors/vscode
+        run: npm run build -- --production
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Package VSIX per platform
+        run: |
+          mkdir -p dist
+          VERSION=${GITHUB_REF_NAME#v}
+
+          platforms=(
+            "linux-x64:ach-lsp-linux-x64:ach-lsp"
+            "darwin-x64:ach-lsp-darwin-x64:ach-lsp"
+            "darwin-arm64:ach-lsp-darwin-arm64:ach-lsp"
+            "win32-x64:ach-lsp-win32-x64.exe:ach-lsp.exe"
+          )
+
+          for entry in "${platforms[@]}"; do
+            IFS=':' read -r target artifact bin_name <<< "$entry"
+
+            mkdir -p editors/vscode/bin
+            cp "artifacts/$artifact" "editors/vscode/bin/$bin_name"
+            chmod +x "editors/vscode/bin/$bin_name"
+
+            cd editors/vscode
+            vsce package --target "$target" -o "../../dist/achronyme-${target}-${VERSION}.vsix"
+            cd ../..
+
+            rm -rf editors/vscode/bin
+          done
+
+      - name: Upload VSIX artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: dist/*.vsix
+
+  release:
+    name: Create Release
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download VSIX artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+          path: dist
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: dist/*.vsix
