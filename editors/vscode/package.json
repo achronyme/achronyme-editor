@@ -1,0 +1,58 @@
+{
+  "name": "achronyme",
+  "displayName": "Achronyme",
+  "description": "Language support for Achronyme (.ach) — ZK cryptography DSL",
+  "version": "0.1.0",
+  "license": "GPL-3.0-only",
+  "publisher": "achronyme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/achronyme/achronyme-editor"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:achronyme"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "achronyme",
+        "aliases": [
+          "Achronyme",
+          "ach"
+        ],
+        "extensions": [
+          ".ach"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "achronyme",
+        "scopeName": "source.ach",
+        "path": "./syntaxes/achronyme.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  }
+}

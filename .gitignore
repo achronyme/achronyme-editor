@@ -1,0 +1,14 @@
+# Rust
+/target/
+Cargo.lock
+
+# Node
+node_modules/
+editors/vscode/out/
+editors/vscode/*.vsix
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
