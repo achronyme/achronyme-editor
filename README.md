@@ -11,6 +11,7 @@ Editor tooling for the [Achronyme](https://github.com/achronyme/achronyme) ZK pr
 - **Syntax highlighting** — TextMate grammar for `.ach` files: keywords, field/bigint literals, strings, comments, operators
 - **Parse error diagnostics** — Real-time squiggles with error messages as you type
 - **Hover documentation** — Hover over keywords and builtin functions for inline docs with signatures
+- **Autocompletion** — Keywords, 32 builtin functions with argument tab-stops, and code snippets (fn, prove, for, if/else, while)
 
 ---
 
@@ -56,7 +57,8 @@ achronyme-editor/
 │       ├── main.rs            Tokio + tower-lsp-server stdio setup
 │       ├── backend.rs         LanguageServer trait implementation
 │       ├── document.rs        Document store + text utilities
-│       └── hover.rs           Static hover table (keywords + builtins)
+│       ├── hover.rs           Static hover table (keywords + builtins)
+│       └── completion.rs      Keyword, builtin, and snippet completions
 ├── editors/vscode/            VS Code extension
 │   ├── src/extension.ts       LSP client, launches ach-lsp
 │   ├── syntaxes/              TextMate grammar
