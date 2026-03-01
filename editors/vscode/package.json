@@ -2,7 +2,7 @@
   "name": "achronyme",
   "displayName": "Achronyme",
   "description": "Language support for Achronyme (.ach) — ZK cryptography DSL",
-  "version": "0.2.0-beta.2",
+  "version": "0.2.0-beta.3",
   "license": "GPL-3.0-only",
   "publisher": "achronyme",
   "repository": {
@@ -40,6 +40,21 @@
         "path": "./syntaxes/achronyme.tmLanguage.json"
       }
     ],
+    "commands": [
+      {
+        "command": "achronyme.run",
+        "title": "Run Achronyme File",
+        "icon": "$(play)"
+      }
+    ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "achronyme.run",
+          "when": "resourceLangId == achronyme && resourceScheme == file"
+        }
+      ]
+    },
     "configuration": {
       "title": "Achronyme",
       "properties": {

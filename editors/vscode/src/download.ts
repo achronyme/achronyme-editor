@@ -26,7 +26,7 @@ function getBinaryName(): string {
   return os.platform() === "win32" ? "ach.exe" : "ach";
 }
 
-function getAchBinaryPath(): string | null {
+export function getAchBinaryPath(): string | null {
   // 1. User-configured path
   const config = workspace.getConfiguration("achronyme");
   const configured = config.get<string>("executablePath");
@@ -39,7 +39,7 @@ function getAchBinaryPath(): string | null {
   return null;
 }
 
-function findOnPath(name: string): Promise<string | null> {
+export function findOnPath(name: string): Promise<string | null> {
   const cmd = os.platform() === "win32" ? "where" : "which";
   return new Promise((resolve) => {
     execFile(cmd, [name], (err, stdout) => {

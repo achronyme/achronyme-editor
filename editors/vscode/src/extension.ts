@@ -1,5 +1,6 @@
 import * as path from "path";
 import {
+  commands,
   ExtensionContext,
   workspace,
   window,
@@ -9,7 +10,7 @@ import {
   LanguageClientOptions,
   ServerOptions,
 } from "vscode-languageclient/node";
-import { ensureAchBinary } from "./download";
+import { ensureAchBinary, getAchBinaryPath, findOnPath } from "./download";
 
 let client: LanguageClient | undefined;
 
@@ -48,6 +49,50 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   // Check for ach CLI binary (non-blocking)
   ensureAchBinary().catch(() => {});
+
+  // Register "Run Achronyme File" command
+  context.subscriptions.push(
+    commands.registerCommand("achronyme.run", async () => {
+      const editor = window.activeTextEditor;
+      if (!editor) {
+        window.showErrorMessage("No active file to run.");
+        return;
+      }
+
+      const document = editor.document;
+      if (document.isDirty) {
+        await document.save();
+      }
+
+      const filePath = document.uri.fsPath;
+
+      // Resolve ach binary path
+      let achPath = getAchBinaryPath() ?? (await findOnPath("ach"));
+      if (!achPath) {
+        const choice = await window.showErrorMessage(
+          "Achronyme CLI (ach) not found. Download it or configure a path.",
+          "Download",
+          "Configure Path",
+        );
+        if (choice === "Download") {
+          await ensureAchBinary();
+          achPath = getAchBinaryPath();
+        } else if (choice === "Configure Path") {
+          await commands.executeCommand(
+            "workbench.action.openSettings",
+            "achronyme.executablePath",
+          );
+        }
+        if (!achPath) return;
+      }
+
+      const terminal =
+        window.terminals.find((t) => t.name === "Achronyme") ??
+        window.createTerminal("Achronyme");
+      terminal.show();
+      terminal.sendText(`${achPath} run "${filePath}"`);
+    }),
+  );
 }
 
 export function deactivate(): Thenable<void> | undefined {
