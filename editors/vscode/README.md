@@ -26,6 +26,10 @@ Hover over any keyword or builtin function to see inline documentation with sign
 - Keywords and snippets (`fn`, `prove {}`, `for..in`, `if/else`, `while`)
 - All 32 builtin functions with argument tab-stops
 
+### Run Button
+
+A play button appears in the editor title bar when a `.ach` file is open. Click it to execute the file with `ach run` in an integrated terminal. The extension auto-saves before running.
+
 ### Auto-download CLI
 
 The extension can automatically download the `ach` CLI from GitHub Releases if it's not found on your system. It also checks for updates on each activation.

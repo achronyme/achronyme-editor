@@ -12,6 +12,8 @@ Editor tooling for the [Achronyme](https://github.com/achronyme/achronyme) ZK pr
 - **Parse error diagnostics** — Real-time squiggles with error messages as you type
 - **Hover documentation** — Hover over keywords and builtin functions for inline docs with signatures
 - **Autocompletion** — Keywords, 32 builtin functions with argument tab-stops, and code snippets (fn, prove, for, if/else, while)
+- **Run button** — Play button in the editor title bar to execute `.ach` files via `ach run` in an integrated terminal
+- **Auto-download CLI** — Downloads `ach` from GitHub Releases if not found; checks for updates on each activation
 
 ---
 
@@ -60,7 +62,9 @@ achronyme-editor/
 │       ├── hover.rs           Static hover table (keywords + builtins)
 │       └── completion.rs      Keyword, builtin, and snippet completions
 ├── editors/vscode/            VS Code extension
-│   ├── src/extension.ts       LSP client, launches ach-lsp
+│   ├── src/
+│   │   ├── extension.ts       LSP client, Run command, launches ach-lsp
+│   │   └── download.ts        Auto-download/update ach CLI from GitHub Releases
 │   ├── syntaxes/              TextMate grammar
 │   └── language-configuration.json
 └── .github/workflows/ci.yml

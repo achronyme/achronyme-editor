@@ -4,7 +4,8 @@ use tower_lsp_server::ls_types::*;
 pub fn keyword_completions() -> Vec<CompletionItem> {
     [
         "let", "mut", "fn", "if", "else", "while", "for", "in", "return", "break", "continue",
-        "forever", "public", "witness", "prove", "true", "false", "nil", "print",
+        "forever", "public", "witness", "prove", "true", "false", "nil", "print", "import",
+        "export", "as",
     ]
     .into_iter()
     .map(|kw| CompletionItem {
@@ -151,6 +152,21 @@ fn code_snippets() -> Vec<CompletionItem> {
             "If-else block",
         ),
         ("while", "while ${1:condition} {\n\t$0\n}", "While loop"),
+        (
+            "import",
+            "import \"${1:./module.ach}\" as ${2:name}",
+            "Import a module",
+        ),
+        (
+            "export fn",
+            "export fn ${1:name}(${2:params}) {\n\t$0\n}",
+            "Export a function",
+        ),
+        (
+            "export let",
+            "export let ${1:name} = ${0:expr}",
+            "Export a constant",
+        ),
     ];
 
     snippets
@@ -172,7 +188,7 @@ mod tests {
 
     #[test]
     fn keyword_count() {
-        assert_eq!(keyword_completions().len(), 19);
+        assert_eq!(keyword_completions().len(), 22);
     }
 
     #[test]
@@ -199,7 +215,7 @@ mod tests {
             .iter()
             .filter(|i| i.kind == Some(CompletionItemKind::SNIPPET))
             .collect();
-        assert_eq!(snippets.len(), 7);
+        assert_eq!(snippets.len(), 10);
     }
 
     #[test]

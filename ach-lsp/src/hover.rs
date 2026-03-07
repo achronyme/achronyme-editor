@@ -65,6 +65,18 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
             "```ach\nlet p = prove { body }\n```\n\
              Compile a circuit, capture witness values from the enclosing scope, and generate a ZK proof inline.",
         ),
+        "import" => Some(
+            "```ach\nimport \"./module.ach\" as mod\n```\n\
+             Import a module. Exposes exported functions and constants via the alias namespace (e.g., `mod.func()`).",
+        ),
+        "export" => Some(
+            "```ach\nexport fn name(params) { body }\nexport let NAME = expr\n```\n\
+             Mark a function or constant as public API, accessible from other modules via `import`.",
+        ),
+        "as" => Some(
+            "```ach\nimport \"./module.ach\" as alias\n```\n\
+             Assign a namespace alias to an imported module.",
+        ),
         "true" => Some("`true` — Boolean literal."),
         "false" => Some("`false` — Boolean literal."),
         "nil" => Some("`nil` — The absence of a value."),
@@ -221,7 +233,8 @@ mod tests {
     fn keywords_have_hover() {
         for kw in [
             "let", "mut", "fn", "if", "else", "while", "for", "in", "return", "break", "continue",
-            "forever", "public", "witness", "prove", "true", "false", "nil",
+            "forever", "public", "witness", "prove", "true", "false", "nil", "import", "export",
+            "as",
         ] {
             assert!(hover_for(kw).is_some(), "missing hover for keyword `{kw}`");
         }

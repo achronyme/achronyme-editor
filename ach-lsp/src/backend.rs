@@ -18,29 +18,45 @@ impl Backend {
     }
 
     async fn publish_diagnostics_for(&self, uri: Uri, text: &str) {
-        let diagnostics = match achronyme_parser::parse_program_with_errors(text) {
-            Ok(_) => vec![],
-            Err(e) => {
-                let line = e.line.saturating_sub(1) as u32;
-                let col = e.col.saturating_sub(1) as u32;
-                let end_col = text
-                    .lines()
-                    .nth(line as usize)
-                    .map(|l| l.len() as u32)
-                    .unwrap_or(col + 1);
+        let (_program, errors) = achronyme_parser::parse_program(text);
 
-                vec![Diagnostic {
+        let diagnostics: Vec<Diagnostic> = errors
+            .iter()
+            .map(|e| {
+                let span = &e.primary_span;
+                let start_line = span.line_start.saturating_sub(1) as u32;
+                let start_col = span.col_start.saturating_sub(1) as u32;
+                let end_line = span.line_end.saturating_sub(1) as u32;
+                let end_col = if span.col_end > span.col_start || span.line_end > span.line_start {
+                    span.col_end.saturating_sub(1) as u32
+                } else {
+                    // Point span — extend to end of line for visibility
+                    text.lines()
+                        .nth(start_line as usize)
+                        .map(|l| l.len() as u32)
+                        .unwrap_or(start_col + 1)
+                };
+
+                let severity = match e.severity {
+                    achronyme_parser::Severity::Error => DiagnosticSeverity::ERROR,
+                    achronyme_parser::Severity::Warning => DiagnosticSeverity::WARNING,
+                    achronyme_parser::Severity::Note => DiagnosticSeverity::INFORMATION,
+                    achronyme_parser::Severity::Help => DiagnosticSeverity::HINT,
+                };
+
+                Diagnostic {
                     range: Range {
-                        start: Position::new(line, col),
-                        end: Position::new(line, end_col),
+                        start: Position::new(start_line, start_col),
+                        end: Position::new(end_line, end_col),
                     },
-                    severity: Some(DiagnosticSeverity::ERROR),
+                    severity: Some(severity),
+                    code: e.code.as_ref().map(|c| NumberOrString::String(c.clone())),
                     source: Some("ach".into()),
-                    message: e.message,
+                    message: e.message.clone(),
                     ..Default::default()
-                }]
-            }
-        };
+                }
+            })
+            .collect();
 
         self.client
             .publish_diagnostics(uri, diagnostics, None)
