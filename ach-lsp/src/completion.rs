@@ -112,6 +112,12 @@ fn builtin_completions() -> Vec<CompletionItem> {
         ("bit_not", "bit_not($1)", "bit_not(x) -> BigInt"),
         ("bit_shl", "bit_shl($1, $2)", "bit_shl(x, n) -> BigInt"),
         ("bit_shr", "bit_shr($1, $2)", "bit_shr(x, n) -> BigInt"),
+        // GC introspection
+        (
+            "gc_stats",
+            "gc_stats()",
+            "gc_stats() -> Map — GC collection count, total freed, and heap size",
+        ),
     ];
 
     builtins

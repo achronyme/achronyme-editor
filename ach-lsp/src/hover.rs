@@ -221,6 +221,12 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
              Shift a BigInt right by `n` bits.",
         ),
 
+        // ── Builtins: GC introspection ─────────────────────────
+        "gc_stats" => Some(
+            "```ach\ngc_stats() -> Map\n```\n\
+             Returns a map with GC statistics: `collections`, `total_freed`, and `heap_size`.",
+        ),
+
         _ => None,
     }
 }
