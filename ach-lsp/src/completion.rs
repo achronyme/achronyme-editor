@@ -112,6 +112,32 @@ fn builtin_completions() -> Vec<CompletionItem> {
         ("bit_not", "bit_not($1)", "bit_not(x) -> BigInt"),
         ("bit_shl", "bit_shl($1, $2)", "bit_shl(x, n) -> BigInt"),
         ("bit_shr", "bit_shr($1, $2)", "bit_shr(x, n) -> BigInt"),
+        // Higher-order collections (part 1)
+        (
+            "map",
+            "map($1, $2)",
+            "map(list, fn) -> List — Apply fn to each element",
+        ),
+        (
+            "filter",
+            "filter($1, $2)",
+            "filter(list, fn) -> List — Keep elements where fn returns true",
+        ),
+        (
+            "reduce",
+            "reduce($1, $2, $3)",
+            "reduce(list, init, fn) -> value — Fold list with accumulator",
+        ),
+        (
+            "for_each",
+            "for_each($1, $2)",
+            "for_each(list, fn) — Call fn on each element (no return value)",
+        ),
+        (
+            "find",
+            "find($1, $2)",
+            "find(list, fn) -> value | nil — First element where fn returns true",
+        ),
         // GC introspection
         (
             "gc_stats",

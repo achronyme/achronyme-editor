@@ -221,6 +221,28 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
              Shift a BigInt right by `n` bits.",
         ),
 
+        // ── Builtins: higher-order collections (part 1) ─────────
+        "map" => Some(
+            "```ach\nmap(list, fn) -> List\n```\n\
+             Apply `fn` to each element and return a new list with the results.",
+        ),
+        "filter" => Some(
+            "```ach\nfilter(list, fn) -> List\n```\n\
+             Return a new list keeping only elements where `fn(element)` is true.",
+        ),
+        "reduce" => Some(
+            "```ach\nreduce(list, init, fn) -> value\n```\n\
+             Fold the list with an accumulator. `fn(acc, element)` is called for each element.",
+        ),
+        "for_each" => Some(
+            "```ach\nfor_each(list, fn)\n```\n\
+             Call `fn(element)` on each element. Returns `nil`.",
+        ),
+        "find" => Some(
+            "```ach\nfind(list, fn) -> value | nil\n```\n\
+             Return the first element where `fn(element)` is true, or `nil` if none found.",
+        ),
+
         // ── Builtins: GC introspection ─────────────────────────
         "gc_stats" => Some(
             "```ach\ngc_stats() -> Map\n```\n\
