@@ -140,8 +140,8 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
             "```ach\nsubstring(str, start, end) -> String\n```\n\
              Extract a substring by character indices `[start, end)`.",
         ),
-        "indexOf" => Some(
-            "```ach\nindexOf(str, substr) -> Int\n```\n\
+        "index_of" => Some(
+            "```ach\nindex_of(str, substr) -> Int\n```\n\
              Find the first occurrence of `substr`. Returns `-1` if not found.",
         ),
         "split" => Some(
@@ -156,12 +156,12 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
             "```ach\nreplace(str, search, replacement) -> String\n```\n\
              Replace all occurrences of `search` with `replacement`.",
         ),
-        "toUpper" => Some(
-            "```ach\ntoUpper(str) -> String\n```\n\
+        "to_upper" => Some(
+            "```ach\nto_upper(str) -> String\n```\n\
              Convert a string to uppercase.",
         ),
-        "toLower" => Some(
-            "```ach\ntoLower(str) -> String\n```\n\
+        "to_lower" => Some(
+            "```ach\nto_lower(str) -> String\n```\n\
              Convert a string to lowercase.",
         ),
         "chars" => Some(
@@ -256,12 +256,12 @@ mod tests {
             "proof_vkey",
             "verify_proof",
             "substring",
-            "indexOf",
+            "index_of",
             "split",
             "trim",
             "replace",
-            "toUpper",
-            "toLower",
+            "to_upper",
+            "to_lower",
             "chars",
             "poseidon",
             "poseidon_many",

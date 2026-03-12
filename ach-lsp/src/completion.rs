@@ -67,7 +67,7 @@ fn builtin_completions() -> Vec<CompletionItem> {
             "substring($1, $2, $3)",
             "substring(str, start, end) -> String",
         ),
-        ("indexOf", "indexOf($1, $2)", "indexOf(str, substr) -> Int"),
+        ("index_of", "index_of($1, $2)", "index_of(str, substr) -> Int"),
         ("split", "split($1, $2)", "split(str, delimiter) -> List"),
         ("trim", "trim($1)", "trim(str) -> String"),
         (
@@ -75,8 +75,8 @@ fn builtin_completions() -> Vec<CompletionItem> {
             "replace($1, $2, $3)",
             "replace(str, search, replacement) -> String",
         ),
-        ("toUpper", "toUpper($1)", "toUpper(str) -> String"),
-        ("toLower", "toLower($1)", "toLower(str) -> String"),
+        ("to_upper", "to_upper($1)", "to_upper(str) -> String"),
+        ("to_lower", "to_lower($1)", "to_lower(str) -> String"),
         ("chars", "chars($1)", "chars(str) -> List"),
         // Crypto
         (
