@@ -243,6 +243,28 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
              Return the first element where `fn(element)` is true, or `nil` if none found.",
         ),
 
+        // ── Builtins: higher-order collections (part 2) ─────────
+        "any" => Some(
+            "```ach\nany(list, fn) -> Bool\n```\n\
+             Return `true` if `fn(element)` is true for at least one element.",
+        ),
+        "all" => Some(
+            "```ach\nall(list, fn) -> Bool\n```\n\
+             Return `true` if `fn(element)` is true for every element.",
+        ),
+        "sort" => Some(
+            "```ach\nsort(list, fn) -> List\n```\n\
+             Return a sorted copy of the list. `fn(a, b)` should return negative, zero, or positive.",
+        ),
+        "flat_map" => Some(
+            "```ach\nflat_map(list, fn) -> List\n```\n\
+             Apply `fn` to each element (must return a list) and flatten the results one level.",
+        ),
+        "zip" => Some(
+            "```ach\nzip(a, b) -> List\n```\n\
+             Pair corresponding elements from two lists into `[a[i], b[i]]` sub-lists. Truncates to the shorter length.",
+        ),
+
         // ── Builtins: GC introspection ─────────────────────────
         "gc_stats" => Some(
             "```ach\ngc_stats() -> Map\n```\n\

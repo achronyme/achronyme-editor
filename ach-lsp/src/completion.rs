@@ -138,6 +138,32 @@ fn builtin_completions() -> Vec<CompletionItem> {
             "find($1, $2)",
             "find(list, fn) -> value | nil — First element where fn returns true",
         ),
+        // Higher-order collections (part 2)
+        (
+            "any",
+            "any($1, $2)",
+            "any(list, fn) -> Bool — True if fn returns true for any element",
+        ),
+        (
+            "all",
+            "all($1, $2)",
+            "all(list, fn) -> Bool — True if fn returns true for all elements",
+        ),
+        (
+            "sort",
+            "sort($1, $2)",
+            "sort(list, fn) -> List — Sort by comparator fn(a, b) -> Int",
+        ),
+        (
+            "flat_map",
+            "flat_map($1, $2)",
+            "flat_map(list, fn) -> List — Map then flatten one level",
+        ),
+        (
+            "zip",
+            "zip($1, $2)",
+            "zip(a, b) -> List — Pair elements from two lists",
+        ),
         // GC introspection
         (
             "gc_stats",
