@@ -67,7 +67,11 @@ fn builtin_completions() -> Vec<CompletionItem> {
             "substring($1, $2, $3)",
             "substring(str, start, end) -> String",
         ),
-        ("index_of", "index_of($1, $2)", "index_of(str, substr) -> Int"),
+        (
+            "index_of",
+            "index_of($1, $2)",
+            "index_of(str, substr) -> Int",
+        ),
         ("split", "split($1, $2)", "split(str, delimiter) -> List"),
         ("trim", "trim($1)", "trim(str) -> String"),
         (
