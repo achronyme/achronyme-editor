@@ -90,6 +90,7 @@ impl LanguageServer for Backend {
                 name: "ach-lsp".into(),
                 version: Some(env!("CARGO_PKG_VERSION").into()),
             }),
+            offset_encoding: None,
         })
     }
 
