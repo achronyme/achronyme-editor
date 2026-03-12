@@ -263,7 +263,7 @@ mod tests {
             .iter()
             .filter(|i| i.kind == Some(CompletionItemKind::FUNCTION))
             .collect();
-        assert_eq!(builtins.len(), 32);
+        assert_eq!(builtins.len(), 43);
     }
 
     #[test]

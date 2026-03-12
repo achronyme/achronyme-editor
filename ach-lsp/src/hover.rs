@@ -325,6 +325,17 @@ mod tests {
             "bit_not",
             "bit_shl",
             "bit_shr",
+            "gc_stats",
+            "map",
+            "filter",
+            "reduce",
+            "for_each",
+            "find",
+            "any",
+            "all",
+            "sort",
+            "flat_map",
+            "zip",
         ] {
             assert!(
                 hover_for(name).is_some(),
