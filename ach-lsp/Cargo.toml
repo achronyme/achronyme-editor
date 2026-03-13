@@ -1,6 +1,6 @@
 [package]
 name = "ach-lsp"
-version = "0.2.0-beta.5"
+version = "0.2.0-beta.6"
 edition = "2021"
 license = "GPL-3.0-only"
 
@@ -9,7 +9,7 @@ name = "ach-lsp"
 path = "src/main.rs"
 
 [dependencies]
-achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", tag = "v0.1.0-beta.5" }
+achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", tag = "v0.1.0-beta.6" }
 tower-lsp-server = "0.23"
 tokio = { version = "1", features = ["full"] }
 dashmap = "6"
