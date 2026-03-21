@@ -7,8 +7,8 @@ import { workspace, window, ProgressLocation, CancellationToken } from "vscode";
 
 const GITHUB_REPO = "achronyme/achronyme";
 const RELEASES_API = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
-const INSTALL_DIR = path.join(os.homedir(), ".achronyme", "bin");
-const VERSION_FILE = path.join(INSTALL_DIR, ".ach-version");
+const INSTALL_DIR = path.join(os.homedir(), ".local", "bin");
+const VERSION_FILE = path.join(os.homedir(), ".local", "share", "achronyme", ".ach-version");
 
 function getArtifactName(): string | null {
   const platform = os.platform();
@@ -32,7 +32,7 @@ export function getAchBinaryPath(): string | null {
   const configured = config.get<string>("executablePath");
   if (configured && fs.existsSync(configured)) return configured;
 
-  // 2. ~/.achronyme/bin/ach
+  // 2. ~/.local/bin/ach (shared with install script)
   const installed = path.join(INSTALL_DIR, getBinaryName());
   if (fs.existsSync(installed)) return installed;
 
@@ -168,6 +168,7 @@ async function downloadAchBinary(): Promise<string> {
   }
 
   // Save version
+  fs.mkdirSync(path.dirname(VERSION_FILE), { recursive: true });
   fs.writeFileSync(VERSION_FILE, release.tag_name, "utf-8");
 
   window.showInformationMessage(
@@ -178,9 +179,24 @@ async function downloadAchBinary(): Promise<string> {
 }
 
 async function checkForUpdate(): Promise<void> {
-  if (!fs.existsSync(VERSION_FILE)) return;
-
-  const currentVersion = fs.readFileSync(VERSION_FILE, "utf-8").trim();
+  let currentVersion: string;
+  if (fs.existsSync(VERSION_FILE)) {
+    currentVersion = fs.readFileSync(VERSION_FILE, "utf-8").trim();
+  } else {
+    // No version file — try to get version from binary
+    const achPath = getAchBinaryPath() || await findOnPath("ach");
+    if (!achPath) return;
+    try {
+      currentVersion = await new Promise<string>((resolve, reject) => {
+        execFile(achPath, ["--version"], (err, stdout) => {
+          if (err) return reject(err);
+          const match = stdout.trim().match(/(\d+\.\d+\.\d+[^\s]*)/);
+          resolve(match ? `v${match[1]}` : "");
+        });
+      });
+      if (!currentVersion) return;
+    } catch { return; }
+  }
 
   let release: GitHubRelease;
   try {
@@ -207,17 +223,18 @@ async function checkForUpdate(): Promise<void> {
 }
 
 export async function ensureAchBinary(): Promise<void> {
-  // 1. Check configured path or installed binary
-  const existing = getAchBinaryPath();
-  if (existing) {
-    // Already installed — check for updates in background
+  // 1. User-configured path takes priority
+  const config = workspace.getConfiguration("achronyme");
+  const configured = config.get<string>("executablePath");
+  if (configured && fs.existsSync(configured)) return;
+
+  // 2. Check PATH (install script puts ach in ~/.local/bin)
+  const onPath = await findOnPath("ach");
+  if (onPath) {
+    // Already on PATH — check for updates in background
     checkForUpdate().catch(() => {});
     return;
   }
-
-  // 2. Check PATH
-  const onPath = await findOnPath("ach");
-  if (onPath) return;
 
   // 3. Prompt user
   const choice = await window.showInformationMessage(
