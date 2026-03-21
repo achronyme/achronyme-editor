@@ -148,8 +148,25 @@
     "builtins": {
       "patterns": [
         {
+          "comment": "Global functions (called as name(args))",
           "name": "support.function.builtin.ach",
-          "match": "\\b(print|len|typeof|assert|time|push|pop|keys|proof_json|proof_public|proof_vkey|substring|index_of|split|trim|replace|to_upper|to_lower|chars|poseidon|poseidon_many|verify_proof|bigint256|bigint512|to_bits|from_bits|bit_and|bit_or|bit_xor|bit_not|bit_shl|bit_shr|gc_stats|map|filter|reduce|for_each|find|any|all|sort|flat_map|zip)\\b(?=\\s*\\()"
+          "match": "\\b(print|typeof|assert|time|gc_stats|proof_json|proof_public|proof_vkey|poseidon|poseidon_many|verify_proof|bigint256|bigint512|from_bits|parse_int|join)\\b(?=\\s*\\()"
+        },
+        {
+          "comment": "Static namespace access (Type::MEMBER)",
+          "match": "\\b(Int|Field|BigInt)(::)(MAX|MIN|ZERO|ONE|ORDER|from_bits)\\b",
+          "captures": {
+            "1": { "name": "support.type.ach" },
+            "2": { "name": "punctuation.accessor.double-colon.ach" },
+            "3": { "name": "support.constant.ach" }
+          }
+        },
+        {
+          "comment": "Method calls (.method(args))",
+          "match": "\\.(len|push|pop|keys|values|entries|contains_key|get|set|remove|map|filter|reduce|for_each|find|any|all|sort|flat_map|zip|abs|min|max|pow|to_field|to_string|to_int|to_bits|to_upper|to_lower|starts_with|ends_with|contains|split|trim|replace|chars|index_of|substring|repeat|bit_and|bit_or|bit_xor|bit_not|bit_shl|bit_shr)\\s*(?=\\()",
+          "captures": {
+            "1": { "name": "support.function.method.ach" }
+          }
         }
       ]
     },
