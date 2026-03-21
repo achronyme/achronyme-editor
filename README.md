@@ -10,8 +10,8 @@ Editor tooling for [Achronyme](https://github.com/achronyme/achronyme), a progra
 
 - **Syntax highlighting** — TextMate grammar for `.ach` files: keywords, field/bigint literals, strings, comments, operators, selective imports, export lists
 - **Parse error diagnostics** — Real-time squiggles with error messages as you type
-- **Hover documentation** — Hover over keywords and builtin functions for inline docs with signatures
-- **Autocompletion** — Keywords, 43 builtin functions with argument tab-stops, and code snippets (fn, prove, for, if/else, while)
+- **Hover documentation** — Hover over keywords, global functions, type methods, and static namespaces for inline docs
+- **Autocompletion** — Keywords, 16 global functions, 44 type methods, 6 static namespace members, and code snippets
 - **Run button** — Play button in the editor title bar to execute `.ach` files via `ach run` in an integrated terminal
 - **Auto-download CLI** — Downloads `ach` from GitHub Releases if not found; checks for updates on each activation
 
@@ -83,7 +83,9 @@ The TextMate grammar highlights:
 | Imports | `import "path" as alias`, `import { x, y } from "path"` |
 | Exports | `export fn`, `export let`, `export { x, y }` |
 | Literals | `42`, `0pxFF`, `0i256d42`, `"string"`, `true`, `false`, `nil` |
-| Builtins | `print`, `poseidon`, `assert`, `map`, `filter`, `reduce`, ... (43 total) |
+| Globals | `print`, `typeof`, `assert`, `poseidon`, `bigint256`, ... (16 global functions) |
+| Methods | `.push()`, `.map()`, `.filter()`, `.len()`, `.keys()`, ... (44 type methods) |
+| Statics | `Int::MAX`, `Field::ZERO`, `Field::ORDER`, `BigInt::from_bits`, ... |
 
 ---
 

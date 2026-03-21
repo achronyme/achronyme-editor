@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "ach-lsp"
-version = "0.2.0-beta.6"
+version = "0.2.0-beta.13"
 dependencies = [
  "achronyme-parser",
  "dashmap",
@@ -14,8 +14,8 @@ dependencies = [
 
 [[package]]
 name = "achronyme-parser"
-version = "0.1.0-beta.6"
-source = "git+https://github.com/achronyme/achronyme.git?tag=v0.1.0-beta.6#46f751b33dd414898b425a44714deabf2d9487c6"
+version = "0.1.0-beta.13"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#7e225ce2b3acf4f76d1241c1ce8457d866fd2b9d"
 
 [[package]]
 name = "bitflags"
