@@ -294,7 +294,16 @@ fn code_snippets() -> Vec<CompletionItem> {
             "fn ${1:name}(${2:params}) {\n\t$0\n}",
             "Define a function",
         ),
-        ("prove", "prove {\n\t$0\n}", "Prove block"),
+        (
+            "prove",
+            "prove {\n\t$0\n}",
+            "Prove block (explicit declarations)",
+        ),
+        (
+            "provep",
+            "prove(public: [${1:inputs}]) {\n\t$0\n}",
+            "Prove block (auto-infer witnesses)",
+        ),
         (
             "for",
             "for ${1:item} in ${2:collection} {\n\t$0\n}",
@@ -392,7 +401,7 @@ mod tests {
             .iter()
             .filter(|i| i.kind == Some(CompletionItemKind::SNIPPET))
             .collect();
-        assert_eq!(snippets.len(), 10);
+        assert_eq!(snippets.len(), 11);
     }
 
     #[test]
@@ -468,8 +477,8 @@ mod tests {
     #[test]
     fn snippet_completions_total_count() {
         let items = snippet_completions();
-        // 16 globals + 46 methods + 6 statics + 10 code snippets = 78
-        assert_eq!(items.len(), 78);
+        // 16 globals + 46 methods + 6 statics + 11 code snippets = 79
+        assert_eq!(items.len(), 79);
     }
 
     #[test]

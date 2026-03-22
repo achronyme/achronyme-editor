@@ -63,8 +63,9 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
              Declare a private input (witness variable) in a circuit.",
         ),
         "prove" => Some(
-            "```ach\nlet p = prove { body }\n```\n\
-             Compile a circuit, capture witness values from the enclosing scope, and generate a ZK proof inline.",
+            "```ach\nlet p = prove(public: [x, y]) { body }\n```\n\
+             Compile a circuit via ProveIR, auto-infer witnesses from scope, and generate a ZK proof inline.\n\n\
+             Classic syntax `prove { witness x; public y; body }` is also supported.",
         ),
         "import" => Some(
             "```ach\nimport \"./module.ach\" as mod\n```\n\

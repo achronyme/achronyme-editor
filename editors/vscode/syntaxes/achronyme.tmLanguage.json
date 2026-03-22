@@ -8,6 +8,7 @@
     { "include": "#strings" },
     { "include": "#constants" },
     { "include": "#numbers" },
+    { "include": "#prove-block" },
     { "include": "#keywords" },
     { "include": "#function-definition" },
     { "include": "#builtins" },
@@ -142,6 +143,32 @@
         {
           "name": "keyword.other.ach",
           "match": "\\b(let|mut|fn|public|witness|prove)\\b"
+        }
+      ]
+    },
+    "prove-block": {
+      "comment": "prove(public: [name1, name2]) { ... } syntax",
+      "begin": "\\b(prove)\\s*(\\()\\s*(public)\\s*(:)\\s*(\\[)",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.ach" },
+        "2": { "name": "punctuation.section.parens.begin.ach" },
+        "3": { "name": "keyword.other.ach" },
+        "4": { "name": "punctuation.separator.colon.ach" },
+        "5": { "name": "punctuation.section.brackets.begin.ach" }
+      },
+      "end": "(\\])\\s*(\\))",
+      "endCaptures": {
+        "1": { "name": "punctuation.section.brackets.end.ach" },
+        "2": { "name": "punctuation.section.parens.end.ach" }
+      },
+      "patterns": [
+        {
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "name": "variable.parameter.public-input.ach"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.ach"
         }
       ]
     },
