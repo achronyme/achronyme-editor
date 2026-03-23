@@ -4,8 +4,8 @@ use tower_lsp_server::ls_types::*;
 pub fn keyword_completions() -> Vec<CompletionItem> {
     [
         "let", "mut", "fn", "if", "else", "while", "for", "in", "return", "break", "continue",
-        "forever", "public", "witness", "prove", "true", "false", "nil", "print", "import",
-        "export", "as",
+        "forever", "public", "witness", "prove", "circuit", "true", "false", "nil", "print",
+        "import", "export", "as", "Public", "Witness", "Field", "Bool",
     ]
     .into_iter()
     .map(|kw| CompletionItem {
@@ -296,13 +296,18 @@ fn code_snippets() -> Vec<CompletionItem> {
         ),
         (
             "prove",
-            "prove {\n\t$0\n}",
-            "Prove block (explicit declarations)",
+            "prove(${1:name}: Public) {\n\t$0\n}",
+            "Prove block with typed params",
         ),
         (
-            "provep",
-            "prove(public: [${1:inputs}]) {\n\t$0\n}",
-            "Prove block (auto-infer witnesses)",
+            "proven",
+            "prove ${1:name}(${2:input}: Public) {\n\t$0\n}",
+            "Named prove block",
+        ),
+        (
+            "circuit",
+            "circuit ${1:name}(${2:input}: Public, ${3:secret}: Witness) {\n\t$0\n}",
+            "Circuit definition",
         ),
         (
             "for",
@@ -357,7 +362,7 @@ mod tests {
 
     #[test]
     fn keyword_count() {
-        assert_eq!(keyword_completions().len(), 22);
+        assert_eq!(keyword_completions().len(), 27);
     }
 
     #[test]
@@ -401,7 +406,7 @@ mod tests {
             .iter()
             .filter(|i| i.kind == Some(CompletionItemKind::SNIPPET))
             .collect();
-        assert_eq!(snippets.len(), 11);
+        assert_eq!(snippets.len(), 12);
     }
 
     #[test]
@@ -477,8 +482,8 @@ mod tests {
     #[test]
     fn snippet_completions_total_count() {
         let items = snippet_completions();
-        // 16 globals + 46 methods + 6 statics + 11 code snippets = 79
-        assert_eq!(items.len(), 79);
+        // 16 globals + 46 methods + 6 statics + 12 code snippets = 80
+        assert_eq!(items.len(), 80);
     }
 
     #[test]

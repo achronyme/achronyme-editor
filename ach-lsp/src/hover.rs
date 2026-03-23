@@ -56,20 +56,45 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
         ),
         "public" => Some(
             "```ach\npublic name\n```\n\
-             Declare a public input (instance variable) in a circuit.",
+             Declare a public input in a standalone circuit file.\n\n\
+             In circuit/prove params: `name: Public` or `name: Public Field[N]`.",
         ),
         "witness" => Some(
             "```ach\nwitness name\nwitness arr[n]\n```\n\
-             Declare a private input (witness variable) in a circuit.",
+             Declare a private input in a standalone circuit file.\n\n\
+             In circuit params: `name: Witness` or `name: Witness Field[N]`.\n\
+             In prove blocks, witnesses are auto-captured from outer scope.",
         ),
         "prove" => Some(
-            "```ach\nlet p = prove(public: [x, y]) { body }\n```\n\
-             Compile a circuit via ProveIR, auto-infer witnesses from scope, and generate a ZK proof inline.\n\n\
-             Classic syntax `prove { witness x; public y; body }` is also supported.",
+            "```ach\nprove(hash: Public) { body }\nprove name(root: Public) { body }\n```\n\
+             Compile a circuit via ProveIR and generate a ZK proof inline.\n\n\
+             Only public inputs are declared — all other referenced variables are auto-captured as witnesses.\n\
+             Named proves (`prove name(...)`) desugar to `let name = prove name(...)`.",
+        ),
+        "circuit" => Some(
+            "```ach\ncircuit name(root: Public, leaf: Witness, path: Witness Field[3]) {\n    body\n}\n```\n\
+             Define a reusable circuit. Parameters require `Public` or `Witness` visibility.\n\n\
+             Call with keyword args: `name(root: val, leaf: val)`.\n\
+             Import from files: `import circuit \"./file.ach\" as name`.",
+        ),
+        "Public" => Some(
+            "`Public` — Visibility modifier for circuit/prove parameters.\n\n\
+             Public inputs are part of the proof statement (visible to verifiers).\n\n\
+             ```ach\ncircuit hash_check(output: Public, secret: Witness) { ... }\nprove(hash: Public) { ... }\n```",
+        ),
+        "Witness" => Some(
+            "`Witness` — Visibility modifier for circuit parameters.\n\n\
+             Witness inputs are private (known only to the prover).\n\n\
+             ```ach\ncircuit merkle(root: Public, path: Witness Field[3]) { ... }\n```\n\n\
+             In prove blocks, witnesses are auto-captured — no `Witness` annotation needed.",
+        ),
+        "Bool" => Some(
+            "`Bool` — Boolean type annotation.\n\n\
+             ```ach\nlet flag: Bool = true\ncircuit check(flag: Public Bool) { ... }\n```",
         ),
         "import" => Some(
-            "```ach\nimport \"./module.ach\" as mod\n```\n\
-             Import a module. Exposes exported functions and constants via the alias namespace (e.g., `mod.func()`).",
+            "```ach\nimport \"./module.ach\" as mod\nimport { func } from \"./module.ach\"\nimport circuit \"./circuit.ach\" as name\n```\n\
+             Import a module, selective names, or a circuit file.",
         ),
         "export" => Some(
             "```ach\nexport fn name(params) { body }\nexport let NAME = expr\n```\n\
@@ -382,8 +407,8 @@ mod tests {
     fn keywords_have_hover() {
         for kw in [
             "let", "mut", "fn", "if", "else", "while", "for", "in", "return", "break", "continue",
-            "forever", "public", "witness", "prove", "true", "false", "nil", "import", "export",
-            "as",
+            "forever", "public", "witness", "prove", "circuit", "true", "false", "nil", "import",
+            "export", "as", "Public", "Witness", "Bool",
         ] {
             assert!(hover_for(kw).is_some(), "missing hover for keyword `{kw}`");
         }
