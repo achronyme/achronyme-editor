@@ -13,6 +13,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ach-lsp-core"
+version = "0.2.0-beta.17"
+dependencies = [
+ "achronyme-parser",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "achronyme-parser"
 version = "0.1.0-beta.17"
 source = "git+https://github.com/achronyme/achronyme.git?branch=main#63e4c10b768f6e294f28d171422ad9c0ac585213"
