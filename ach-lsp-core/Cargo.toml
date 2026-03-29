@@ -1,0 +1,11 @@
+[package]
+name = "ach-lsp-core"
+version = "0.2.0-beta.17"
+edition = "2021"
+license = "GPL-3.0-only"
+description = "Core LSP logic for Achronyme: diagnostics, completions, hover, definitions, symbols. No tower-lsp dependency — compiles to WASM."
+
+[dependencies]
+achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", branch = "main" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
