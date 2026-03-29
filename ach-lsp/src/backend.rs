@@ -87,6 +87,11 @@ impl LanguageServer for Backend {
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
                 completion_provider: Some(CompletionOptions::default()),
                 definition_provider: Some(OneOf::Left(true)),
+                references_provider: Some(OneOf::Left(true)),
+                rename_provider: Some(OneOf::Right(RenameOptions {
+                    prepare_provider: Some(true),
+                    work_done_progress_options: Default::default(),
+                })),
                 document_symbol_provider: Some(OneOf::Left(true)),
                 ..Default::default()
             },
@@ -202,6 +207,98 @@ impl LanguageServer for Backend {
         Ok(Some(GotoDefinitionResponse::Scalar(Location::new(
             uri, range,
         ))))
+    }
+
+    async fn references(
+        &self,
+        params: ReferenceParams,
+    ) -> tower_lsp_server::jsonrpc::Result<Option<Vec<Location>>> {
+        let uri = params.text_document_position.text_document.uri;
+        let pos = params.text_document_position.position;
+
+        let text = match self.documents.get(&uri.to_string()) {
+            Some(t) => t,
+            None => return Ok(None),
+        };
+
+        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
+        {
+            Some(o) => o,
+            None => return Ok(None),
+        };
+
+        let ranges = definitions::find_references(&text, byte_offset);
+        if ranges.is_empty() {
+            return Ok(None);
+        }
+
+        let locations: Vec<Location> = ranges
+            .into_iter()
+            .map(|r| Location::new(uri.clone(), r))
+            .collect();
+        Ok(Some(locations))
+    }
+
+    async fn prepare_rename(
+        &self,
+        params: TextDocumentPositionParams,
+    ) -> tower_lsp_server::jsonrpc::Result<Option<PrepareRenameResponse>> {
+        let uri_str = params.text_document.uri.to_string();
+        let pos = params.position;
+
+        let text = match self.documents.get(&uri_str) {
+            Some(t) => t,
+            None => return Ok(None),
+        };
+
+        let byte_offset =
+            match definitions::position_to_byte_offset(&text, pos.line, pos.character) {
+                Some(o) => o,
+                None => return Ok(None),
+            };
+
+        match definitions::prepare_rename(&text, byte_offset) {
+            Some((range, _)) => Ok(Some(PrepareRenameResponse::Range(range))),
+            None => Ok(None),
+        }
+    }
+
+    async fn rename(
+        &self,
+        params: RenameParams,
+    ) -> tower_lsp_server::jsonrpc::Result<Option<WorkspaceEdit>> {
+        let uri = params.text_document_position.text_document.uri;
+        let pos = params.text_document_position.position;
+        let new_name = params.new_name;
+
+        let text = match self.documents.get(&uri.to_string()) {
+            Some(t) => t,
+            None => return Ok(None),
+        };
+
+        let byte_offset =
+            match definitions::position_to_byte_offset(&text, pos.line, pos.character) {
+                Some(o) => o,
+                None => return Ok(None),
+            };
+
+        let edits = definitions::rename(&text, byte_offset, &new_name);
+        if edits.is_empty() {
+            return Ok(None);
+        }
+
+        let text_edits: Vec<TextEdit> = edits
+            .into_iter()
+            .map(|(range, new)| TextEdit::new(range, new))
+            .collect();
+
+        let mut changes = std::collections::HashMap::new();
+        changes.insert(uri, text_edits);
+
+        Ok(Some(WorkspaceEdit {
+            changes: Some(changes),
+            ..Default::default()
+        }))
     }
 
     async fn document_symbol(
