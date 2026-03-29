@@ -1,5 +1,6 @@
 mod backend;
 mod completion;
+mod definitions;
 mod document;
 mod hover;
 mod symbols;

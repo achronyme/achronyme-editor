@@ -1,4 +1,5 @@
 use crate::completion;
+use crate::definitions;
 use crate::document::{self, DocumentStore};
 use crate::hover;
 use crate::symbols;
@@ -85,6 +86,7 @@ impl LanguageServer for Backend {
                 )),
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
                 completion_provider: Some(CompletionOptions::default()),
+                definition_provider: Some(OneOf::Left(true)),
                 document_symbol_provider: Some(OneOf::Left(true)),
                 ..Default::default()
             },
@@ -167,6 +169,39 @@ impl LanguageServer for Backend {
         let mut items = completion::keyword_completions();
         items.extend(completion::snippet_completions());
         Ok(Some(CompletionResponse::Array(items)))
+    }
+
+    async fn goto_definition(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> tower_lsp_server::jsonrpc::Result<Option<GotoDefinitionResponse>> {
+        let uri_str = params
+            .text_document_position_params
+            .text_document
+            .uri
+            .to_string();
+        let pos = params.text_document_position_params.position;
+
+        let text = match self.documents.get(&uri_str) {
+            Some(t) => t,
+            None => return Ok(None),
+        };
+
+        let byte_offset =
+            match definitions::position_to_byte_offset(&text, pos.line, pos.character) {
+                Some(o) => o,
+                None => return Ok(None),
+            };
+
+        let range = match definitions::goto_definition(&text, byte_offset) {
+            Some(r) => r,
+            None => return Ok(None),
+        };
+
+        let uri = params.text_document_position_params.text_document.uri;
+        Ok(Some(GotoDefinitionResponse::Scalar(Location::new(
+            uri, range,
+        ))))
     }
 
     async fn document_symbol(
