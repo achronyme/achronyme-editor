@@ -184,7 +184,8 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
         ),
         "to_string" => Some(
             "```ach\nvalue.to_string() -> String\n```\n\
-             String representation. Available on Int, String, Field, and BigInt (decimal).",
+             String representation. Available on Int, String, Field, BigInt, Bool, and List.\n\
+             Lists format as `[1, 2, 3]` with recursive element formatting.",
         ),
         "to_hex" => Some(
             "```ach\nbigint.to_hex() -> String\n```\n\

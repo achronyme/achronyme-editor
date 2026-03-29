@@ -121,7 +121,7 @@ fn method_completions() -> Vec<CompletionItem> {
         ),
         (
             "to_string",
-            ".to_string() -> String — Convert to String (Int, String, Field, BigInt)",
+            ".to_string() -> String — Convert to String (Int, String, Field, BigInt, Bool, List)",
         ),
         (
             "to_hex",
@@ -468,10 +468,7 @@ mod tests {
     #[test]
     fn snippets_contain_tabstops() {
         let items = snippet_completions();
-        for item in items
-            .iter()
-            .filter(|i| i.kind == CompletionKind::Snippet)
-        {
+        for item in items.iter().filter(|i| i.kind == CompletionKind::Snippet) {
             let text = item.insert_text.as_ref().unwrap();
             assert!(
                 text.contains("$0") || text.contains("$1") || text.contains("${1:"),
