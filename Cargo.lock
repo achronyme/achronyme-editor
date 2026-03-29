@@ -14,8 +14,8 @@ dependencies = [
 
 [[package]]
 name = "achronyme-parser"
-version = "0.1.0-beta.15"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#1536bf15ac65f54aea77f0d35055c35576e08931"
+version = "0.1.0-beta.17"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#63e4c10b768f6e294f28d171422ad9c0ac585213"
 
 [[package]]
 name = "bitflags"

@@ -1,6 +1,6 @@
 [package]
 name = "ach-lsp"
-version = "0.2.0-beta.15"
+version = "0.2.0-beta.17"
 edition = "2021"
 license = "GPL-3.0-only"
 

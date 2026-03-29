@@ -2,6 +2,7 @@ mod backend;
 mod completion;
 mod document;
 mod hover;
+mod symbols;
 
 use backend::Backend;
 use tower_lsp_server::{LspService, Server};

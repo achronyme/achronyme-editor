@@ -184,7 +184,11 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
         ),
         "to_string" => Some(
             "```ach\nvalue.to_string() -> String\n```\n\
-             String representation. Available on Int, String, and Field.",
+             String representation. Available on Int, String, Field, and BigInt (decimal).",
+        ),
+        "to_hex" => Some(
+            "```ach\nbigint.to_hex() -> String\n```\n\
+             Hex string representation of a BigInt, prefixed with `0x`.",
         ),
 
         // -- List --
@@ -441,7 +445,7 @@ mod tests {
             );
         }
 
-        // Methods (44)
+        // Methods (45)
         for name in [
             "len",
             "push",
@@ -481,6 +485,7 @@ mod tests {
             "pow",
             "to_field",
             "to_string",
+            "to_hex",
             "to_int",
             "to_bits",
             "bit_and",

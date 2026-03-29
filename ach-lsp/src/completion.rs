@@ -104,8 +104,8 @@ fn builtin_completions() -> Vec<CompletionItem> {
         .collect()
 }
 
-/// Type methods (46 unique names, deduplicated across Int, String, List, Map, Field, BigInt).
-/// These are invoked via `.method()` syntax in beta.13.
+/// Type methods (47 unique names, deduplicated across Int, String, List, Map, Field, BigInt).
+/// These are invoked via `.method()` syntax.
 fn method_completions() -> Vec<CompletionItem> {
     let methods: &[(&str, &str)] = &[
         // (label, detail)
@@ -120,7 +120,11 @@ fn method_completions() -> Vec<CompletionItem> {
         ),
         (
             "to_string",
-            ".to_string() -> String — Convert to String (Int, String, Field)",
+            ".to_string() -> String — Convert to String (Int, String, Field, BigInt)",
+        ),
+        (
+            "to_hex",
+            ".to_hex() -> String — BigInt hex representation (0x-prefixed)",
         ),
         // String methods (excluding to_string, already listed)
         ("len", ".len() -> Int — Length of String, List, or Map"),
@@ -384,7 +388,7 @@ mod tests {
     #[test]
     fn method_count() {
         let items = method_completions();
-        assert_eq!(items.len(), 46);
+        assert_eq!(items.len(), 47);
         for item in &items {
             assert_eq!(item.kind, Some(CompletionItemKind::METHOD));
         }
@@ -482,8 +486,8 @@ mod tests {
     #[test]
     fn snippet_completions_total_count() {
         let items = snippet_completions();
-        // 16 globals + 46 methods + 6 statics + 12 code snippets = 80
-        assert_eq!(items.len(), 80);
+        // 16 globals + 47 methods + 6 statics + 12 code snippets = 81
+        assert_eq!(items.len(), 81);
     }
 
     #[test]

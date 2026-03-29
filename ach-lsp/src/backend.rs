@@ -1,6 +1,7 @@
 use crate::completion;
 use crate::document::{self, DocumentStore};
 use crate::hover;
+use crate::symbols;
 use tower_lsp_server::ls_types::*;
 use tower_lsp_server::{Client, LanguageServer};
 
@@ -84,6 +85,7 @@ impl LanguageServer for Backend {
                 )),
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
                 completion_provider: Some(CompletionOptions::default()),
+                document_symbol_provider: Some(OneOf::Left(true)),
                 ..Default::default()
             },
             server_info: Some(ServerInfo {
@@ -165,6 +167,19 @@ impl LanguageServer for Backend {
         let mut items = completion::keyword_completions();
         items.extend(completion::snippet_completions());
         Ok(Some(CompletionResponse::Array(items)))
+    }
+
+    async fn document_symbol(
+        &self,
+        params: DocumentSymbolParams,
+    ) -> tower_lsp_server::jsonrpc::Result<Option<DocumentSymbolResponse>> {
+        let uri = params.text_document.uri.to_string();
+        let text = match self.documents.get(&uri) {
+            Some(t) => t,
+            None => return Ok(None),
+        };
+        let syms = symbols::document_symbols(&text);
+        Ok(Some(DocumentSymbolResponse::Nested(syms)))
     }
 }
 
