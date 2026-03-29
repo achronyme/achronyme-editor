@@ -6,6 +6,13 @@
 
 use crate::types::{DiagnosticSeverity, LspDiagnostic, Position, Range};
 
+/// Parse source and return LSP-compatible diagnostics.
+/// This is the primary entry point — avoids cross-crate parser type mismatches.
+pub fn check(source: &str) -> Vec<LspDiagnostic> {
+    let (_program, errors) = achronyme_parser::parse_program(source);
+    map_diagnostics(&errors, source)
+}
+
 /// Convert parser diagnostics to LSP-compatible diagnostics.
 pub fn map_diagnostics(errors: &[achronyme_parser::Diagnostic], text: &str) -> Vec<LspDiagnostic> {
     errors
