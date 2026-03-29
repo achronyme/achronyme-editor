@@ -3,8 +3,8 @@
 //! Walks the AST produced by `parse_program` and extracts top-level
 //! declarations: functions, circuit definitions, and named prove blocks.
 
-use achronyme_parser::ast::{Expr, Span, Stmt};
 use crate::types::*;
+use achronyme_parser::ast::{Expr, Span, Stmt};
 
 /// Convert a parser Span (1-based) to an LSP Range (0-based).
 fn span_to_range(span: &Span) -> Range {
@@ -120,32 +120,28 @@ fn collect_stmt_symbols(stmt: &Stmt, symbols: &mut Vec<DocumentSymbol>) {
                 });
             }
         }
-        Stmt::Expr(expr) => {
-            // Top-level prove expression (named)
-            if let Expr::Prove {
-                name: Some(prove_name),
-                params,
-                span,
-                ..
-            } = expr
-            {
-                let detail = format!(
-                    "prove({})",
-                    params
-                        .iter()
-                        .map(|p| p.name.as_str())
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                );
-                let range = span_to_range(span);
-                symbols.push(DocumentSymbol {
-                    name: prove_name.clone(),
-                    detail: Some(detail),
-                    kind: SymbolKind::Event,
-                    range,
-                    selection_range: range,
-                });
-            }
+        Stmt::Expr(Expr::Prove {
+            name: Some(prove_name),
+            params,
+            span,
+            ..
+        }) => {
+            let detail = format!(
+                "prove({})",
+                params
+                    .iter()
+                    .map(|p| p.name.as_str())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+            let range = span_to_range(span);
+            symbols.push(DocumentSymbol {
+                name: prove_name.clone(),
+                detail: Some(detail),
+                kind: SymbolKind::Event,
+                range,
+                selection_range: range,
+            });
         }
         Stmt::Import { alias, span, .. } => {
             let range = span_to_range(span);

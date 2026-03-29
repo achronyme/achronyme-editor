@@ -4,8 +4,8 @@
 //! the identifier under the cursor. Understands the VM → prove/circuit
 //! scope boundary: outer functions are visible inside prove blocks.
 
-use achronyme_parser::ast::*;
 use crate::types::{Position, Range, TextEdit};
+use achronyme_parser::ast::*;
 
 /// A definition site: where a name was introduced.
 #[derive(Clone, Debug)]
@@ -207,7 +207,7 @@ impl DefCollector {
             .iter()
             .filter(|(n, def)| n == name && def.span.byte_start <= byte_offset)
             .map(|(_, def)| def)
-            .last() // last definition before cursor = closest
+            .next_back() // last definition before cursor = closest
     }
 }
 
@@ -326,7 +326,7 @@ pub fn find_references(source: &str, byte_offset: usize) -> Vec<Range> {
     collect_ident_refs(&program, &name, &mut ref_spans);
 
     let mut ranges: Vec<Range> = spans.iter().map(|s| span_to_range(s)).collect();
-    ranges.extend(ref_spans.iter().map(|s| span_to_range(s)));
+    ranges.extend(ref_spans.iter().map(span_to_range));
 
     // Deduplicate by range start position
     ranges.sort_by_key(|r| (r.start.line, r.start.character));
@@ -446,9 +446,7 @@ pub fn prepare_rename(source: &str, byte_offset: usize) -> Option<(Range, String
     let mut collector = DefCollector::new();
     collector.collect_program(&program);
 
-    if collector.resolve(&name, source.len()).is_none() {
-        return None;
-    }
+    collector.resolve(&name, source.len())?;
 
     // Return the range of the word under cursor
     let start = byte_offset

@@ -18,10 +18,11 @@ impl Backend {
 
     async fn publish_diagnostics_for(&self, uri: Uri, text: &str) {
         let (_program, errors) = achronyme_parser::parse_program(text);
-        let diagnostics: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
-            .into_iter()
-            .map(convert::diagnostic)
-            .collect();
+        let diagnostics: Vec<Diagnostic> =
+            ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
+                .into_iter()
+                .map(convert::diagnostic)
+                .collect();
 
         self.client
             .publish_diagnostics(uri, diagnostics, None)
@@ -155,12 +156,14 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset =
-            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
-            {
-                Some(o) => o,
-                None => return Ok(None),
-            };
+        let byte_offset = match ach_lsp_core::definitions::position_to_byte_offset(
+            &text,
+            pos.line,
+            pos.character,
+        ) {
+            Some(o) => o,
+            None => return Ok(None),
+        };
 
         let r = match ach_lsp_core::definitions::goto_definition(&text, byte_offset) {
             Some(r) => r,
@@ -186,12 +189,14 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset =
-            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
-            {
-                Some(o) => o,
-                None => return Ok(None),
-            };
+        let byte_offset = match ach_lsp_core::definitions::position_to_byte_offset(
+            &text,
+            pos.line,
+            pos.character,
+        ) {
+            Some(o) => o,
+            None => return Ok(None),
+        };
 
         let ranges = ach_lsp_core::definitions::find_references(&text, byte_offset);
         if ranges.is_empty() {
@@ -217,12 +222,14 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset =
-            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
-            {
-                Some(o) => o,
-                None => return Ok(None),
-            };
+        let byte_offset = match ach_lsp_core::definitions::position_to_byte_offset(
+            &text,
+            pos.line,
+            pos.character,
+        ) {
+            Some(o) => o,
+            None => return Ok(None),
+        };
 
         match ach_lsp_core::definitions::prepare_rename(&text, byte_offset) {
             Some((r, _)) => Ok(Some(PrepareRenameResponse::Range(convert::range(r)))),
@@ -243,12 +250,14 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset =
-            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
-            {
-                Some(o) => o,
-                None => return Ok(None),
-            };
+        let byte_offset = match ach_lsp_core::definitions::position_to_byte_offset(
+            &text,
+            pos.line,
+            pos.character,
+        ) {
+            Some(o) => o,
+            None => return Ok(None),
+        };
 
         let edits = ach_lsp_core::definitions::rename(&text, byte_offset, &new_name);
         if edits.is_empty() {
