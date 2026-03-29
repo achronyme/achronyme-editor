@@ -7,12 +7,12 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
     match word {
         // ── Keywords ──────────────────────────────────────────────
         "let" => Some(
-            "```ach\nlet name = expr\nlet mut name = expr\n```\n\
-             Declare a variable. Use `mut` for mutable bindings.",
+            "```ach\nlet name = expr\n```\n\
+             Declare an immutable variable. Use `mut` instead for mutable bindings.",
         ),
         "mut" => Some(
-            "```ach\nlet mut name = expr\n```\n\
-             Mark a variable as mutable, allowing reassignment.",
+            "```ach\nmut name = expr\n```\n\
+             Declare a mutable variable, allowing reassignment with `name = new_value`.",
         ),
         "fn" => Some(
             "```ach\nfn name(params) { body }\nfn name(params) -> Type { body }\n```\n\
