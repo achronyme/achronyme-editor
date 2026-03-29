@@ -1,3 +1,3 @@
 [workspace]
-members = ["ach-lsp"]
+members = ["ach-lsp-core", "ach-lsp"]
 resolver = "2"
