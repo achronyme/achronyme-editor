@@ -1,59 +1,11 @@
-use crate::completion;
-use crate::definitions;
-use crate::document::{self, DocumentStore};
-use crate::hover;
-use crate::symbols;
+use crate::convert;
+use crate::document::DocumentStore;
 use tower_lsp_server::ls_types::*;
 use tower_lsp_server::{Client, LanguageServer};
 
 pub struct Backend {
     client: Client,
     documents: DocumentStore,
-}
-
-/// Convert parser diagnostics to LSP diagnostics.
-///
-/// The parser uses 1-based line/col; LSP uses 0-based. Point spans (where
-/// start == end) are extended to the end of the line for visibility in the
-/// editor.
-pub fn map_diagnostics(errors: &[achronyme_parser::Diagnostic], text: &str) -> Vec<Diagnostic> {
-    errors
-        .iter()
-        .map(|e| {
-            let span = &e.primary_span;
-            let start_line = span.line_start.saturating_sub(1) as u32;
-            let start_col = span.col_start.saturating_sub(1) as u32;
-            let end_line = span.line_end.saturating_sub(1) as u32;
-            let end_col = if span.col_end > span.col_start || span.line_end > span.line_start {
-                span.col_end.saturating_sub(1) as u32
-            } else {
-                // Point span — extend to end of line for visibility
-                text.lines()
-                    .nth(start_line as usize)
-                    .map(|l| l.len() as u32)
-                    .unwrap_or(start_col + 1)
-            };
-
-            let severity = match e.severity {
-                achronyme_parser::Severity::Error => DiagnosticSeverity::ERROR,
-                achronyme_parser::Severity::Warning => DiagnosticSeverity::WARNING,
-                achronyme_parser::Severity::Note => DiagnosticSeverity::INFORMATION,
-                achronyme_parser::Severity::Help => DiagnosticSeverity::HINT,
-            };
-
-            Diagnostic {
-                range: Range {
-                    start: Position::new(start_line, start_col),
-                    end: Position::new(end_line, end_col),
-                },
-                severity: Some(severity),
-                code: e.code.as_ref().map(|c| NumberOrString::String(c.clone())),
-                source: Some("ach".into()),
-                message: e.message.clone(),
-                ..Default::default()
-            }
-        })
-        .collect()
 }
 
 impl Backend {
@@ -66,7 +18,10 @@ impl Backend {
 
     async fn publish_diagnostics_for(&self, uri: Uri, text: &str) {
         let (_program, errors) = achronyme_parser::parse_program(text);
-        let diagnostics = map_diagnostics(&errors, text);
+        let diagnostics: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
 
         self.client
             .publish_diagnostics(uri, diagnostics, None)
@@ -148,12 +103,13 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let (word, range) = match document::word_at_position(&text, pos.line, pos.character) {
-            Some(w) => w,
-            None => return Ok(None),
-        };
+        let (word, core_range) =
+            match ach_lsp_core::document::word_at_position(&text, pos.line, pos.character) {
+                Some(w) => w,
+                None => return Ok(None),
+            };
 
-        let doc = match hover::hover_for(&word) {
+        let doc = match ach_lsp_core::hover::hover_for(&word) {
             Some(d) => d,
             None => return Ok(None),
         };
@@ -163,7 +119,7 @@ impl LanguageServer for Backend {
                 kind: MarkupKind::Markdown,
                 value: doc.to_string(),
             }),
-            range: Some(range),
+            range: Some(convert::range(core_range)),
         }))
     }
 
@@ -171,8 +127,15 @@ impl LanguageServer for Backend {
         &self,
         _: CompletionParams,
     ) -> tower_lsp_server::jsonrpc::Result<Option<CompletionResponse>> {
-        let mut items = completion::keyword_completions();
-        items.extend(completion::snippet_completions());
+        let mut items: Vec<CompletionItem> = ach_lsp_core::completion::keyword_completions()
+            .into_iter()
+            .map(convert::completion_item)
+            .collect();
+        items.extend(
+            ach_lsp_core::completion::snippet_completions()
+                .into_iter()
+                .map(convert::completion_item),
+        );
         Ok(Some(CompletionResponse::Array(items)))
     }
 
@@ -192,20 +155,22 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
-        {
-            Some(o) => o,
-            None => return Ok(None),
-        };
+        let byte_offset =
+            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
+            {
+                Some(o) => o,
+                None => return Ok(None),
+            };
 
-        let range = match definitions::goto_definition(&text, byte_offset) {
+        let r = match ach_lsp_core::definitions::goto_definition(&text, byte_offset) {
             Some(r) => r,
             None => return Ok(None),
         };
 
         let uri = params.text_document_position_params.text_document.uri;
         Ok(Some(GotoDefinitionResponse::Scalar(Location::new(
-            uri, range,
+            uri,
+            convert::range(r),
         ))))
     }
 
@@ -221,20 +186,21 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
-        {
-            Some(o) => o,
-            None => return Ok(None),
-        };
+        let byte_offset =
+            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
+            {
+                Some(o) => o,
+                None => return Ok(None),
+            };
 
-        let ranges = definitions::find_references(&text, byte_offset);
+        let ranges = ach_lsp_core::definitions::find_references(&text, byte_offset);
         if ranges.is_empty() {
             return Ok(None);
         }
 
         let locations: Vec<Location> = ranges
             .into_iter()
-            .map(|r| Location::new(uri.clone(), r))
+            .map(|r| Location::new(uri.clone(), convert::range(r)))
             .collect();
         Ok(Some(locations))
     }
@@ -251,14 +217,15 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
-        {
-            Some(o) => o,
-            None => return Ok(None),
-        };
+        let byte_offset =
+            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
+            {
+                Some(o) => o,
+                None => return Ok(None),
+            };
 
-        match definitions::prepare_rename(&text, byte_offset) {
-            Some((range, _)) => Ok(Some(PrepareRenameResponse::Range(range))),
+        match ach_lsp_core::definitions::prepare_rename(&text, byte_offset) {
+            Some((r, _)) => Ok(Some(PrepareRenameResponse::Range(convert::range(r)))),
             None => Ok(None),
         }
     }
@@ -276,21 +243,19 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
-        {
-            Some(o) => o,
-            None => return Ok(None),
-        };
+        let byte_offset =
+            match ach_lsp_core::definitions::position_to_byte_offset(&text, pos.line, pos.character)
+            {
+                Some(o) => o,
+                None => return Ok(None),
+            };
 
-        let edits = definitions::rename(&text, byte_offset, &new_name);
+        let edits = ach_lsp_core::definitions::rename(&text, byte_offset, &new_name);
         if edits.is_empty() {
             return Ok(None);
         }
 
-        let text_edits: Vec<TextEdit> = edits
-            .into_iter()
-            .map(|(range, new)| TextEdit::new(range, new))
-            .collect();
+        let text_edits: Vec<TextEdit> = edits.into_iter().map(convert::text_edit).collect();
 
         let mut changes = std::collections::HashMap::new();
         changes.insert(uri, text_edits);
@@ -310,7 +275,10 @@ impl LanguageServer for Backend {
             Some(t) => t,
             None => return Ok(None),
         };
-        let syms = symbols::document_symbols(&text);
+        let syms: Vec<DocumentSymbol> = ach_lsp_core::symbols::document_symbols(&text)
+            .into_iter()
+            .map(convert::document_symbol)
+            .collect();
         Ok(Some(DocumentSymbolResponse::Nested(syms)))
     }
 }
@@ -318,13 +286,15 @@ impl LanguageServer for Backend {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use achronyme_parser::diagnostic::SpanRange;
 
     #[test]
     fn valid_source_produces_no_diagnostics() {
         let text = "let x = 1 + 2";
         let (_prog, errors) = achronyme_parser::parse_program(text);
-        let diags = map_diagnostics(&errors, text);
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
         assert!(diags.is_empty());
     }
 
@@ -332,7 +302,10 @@ mod tests {
     fn single_error_maps_correctly() {
         let text = "let x =";
         let (_prog, errors) = achronyme_parser::parse_program(text);
-        let diags = map_diagnostics(&errors, text);
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
         assert!(!diags.is_empty(), "should report at least one error");
         assert_eq!(diags[0].severity, Some(DiagnosticSeverity::ERROR));
         assert_eq!(diags[0].source.as_deref(), Some("ach"));
@@ -340,10 +313,12 @@ mod tests {
 
     #[test]
     fn multiple_errors_all_reported() {
-        // Two broken statements — parser should recover and report both
         let text = "let x =\nlet y =";
         let (_prog, errors) = achronyme_parser::parse_program(text);
-        let diags = map_diagnostics(&errors, text);
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
         assert!(
             diags.len() >= 2,
             "expected at least 2 diagnostics, got {}",
@@ -353,33 +328,40 @@ mod tests {
 
     #[test]
     fn line_col_converted_to_zero_based() {
-        // Parser uses 1-based, LSP uses 0-based
+        use achronyme_parser::diagnostic::SpanRange;
         let errors = vec![achronyme_parser::Diagnostic::error(
             "test error",
             SpanRange::new(0, 5, 3, 7, 3, 12),
         )];
-        let diags = map_diagnostics(&errors, "");
-        assert_eq!(diags[0].range.start.line, 2); // 3 - 1
-        assert_eq!(diags[0].range.start.character, 6); // 7 - 1
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, "")
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
+        assert_eq!(diags[0].range.start.line, 2);
+        assert_eq!(diags[0].range.start.character, 6);
         assert_eq!(diags[0].range.end.line, 2);
-        assert_eq!(diags[0].range.end.character, 11); // 12 - 1
+        assert_eq!(diags[0].range.end.character, 11);
     }
 
     #[test]
     fn point_span_extends_to_end_of_line() {
+        use achronyme_parser::diagnostic::SpanRange;
         let text = "let x = ;";
         let errors = vec![achronyme_parser::Diagnostic::error(
             "expected expression",
             SpanRange::point(1, 9, 8),
         )];
-        let diags = map_diagnostics(&errors, text);
-        // Point span: col_end == col_start, so should extend to end of line
-        assert_eq!(diags[0].range.start.character, 8); // col 9 -> 0-based 8
-        assert_eq!(diags[0].range.end.character, text.len() as u32); // end of line
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
+        assert_eq!(diags[0].range.start.character, 8);
+        assert_eq!(diags[0].range.end.character, text.len() as u32);
     }
 
     #[test]
     fn severity_mapping() {
+        use achronyme_parser::diagnostic::SpanRange;
         let make = |sev: achronyme_parser::Severity| {
             let mut d = achronyme_parser::Diagnostic::error("x", SpanRange::point(1, 1, 0));
             d.severity = sev;
@@ -392,7 +374,10 @@ mod tests {
             make(achronyme_parser::Severity::Note),
             make(achronyme_parser::Severity::Help),
         ];
-        let diags = map_diagnostics(&errors, "");
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, "")
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
         assert_eq!(diags[0].severity, Some(DiagnosticSeverity::ERROR));
         assert_eq!(diags[1].severity, Some(DiagnosticSeverity::WARNING));
         assert_eq!(diags[2].severity, Some(DiagnosticSeverity::INFORMATION));
@@ -401,12 +386,16 @@ mod tests {
 
     #[test]
     fn diagnostic_code_preserved() {
+        use achronyme_parser::diagnostic::SpanRange;
         let errors =
             vec![
                 achronyme_parser::Diagnostic::warning("unused", SpanRange::point(1, 1, 0))
                     .with_code("W001"),
             ];
-        let diags = map_diagnostics(&errors, "");
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, "")
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
         assert_eq!(
             diags[0].code,
             Some(NumberOrString::String("W001".to_string()))
@@ -415,21 +404,29 @@ mod tests {
 
     #[test]
     fn diagnostic_without_code() {
+        use achronyme_parser::diagnostic::SpanRange;
         let errors = vec![achronyme_parser::Diagnostic::error(
             "oops",
             SpanRange::point(1, 1, 0),
         )];
-        let diags = map_diagnostics(&errors, "");
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, "")
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
         assert_eq!(diags[0].code, None);
     }
 
     #[test]
     fn message_preserved() {
+        use achronyme_parser::diagnostic::SpanRange;
         let errors = vec![achronyme_parser::Diagnostic::error(
             "undefined variable: `foo`",
             SpanRange::point(1, 1, 0),
         )];
-        let diags = map_diagnostics(&errors, "");
+        let diags: Vec<Diagnostic> = ach_lsp_core::diagnostics::map_diagnostics(&errors, "")
+            .into_iter()
+            .map(convert::diagnostic)
+            .collect();
         assert_eq!(diags[0].message, "undefined variable: `foo`");
     }
 }
