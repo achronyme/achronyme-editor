@@ -114,7 +114,10 @@ impl DefCollector {
             }
             Stmt::Export { inner, .. } => self.collect_stmt(inner),
             Stmt::Expr(expr) => self.collect_expr(expr),
-            Stmt::Print { value, .. } | Stmt::Return { value: Some(value), .. } => {
+            Stmt::Print { value, .. }
+            | Stmt::Return {
+                value: Some(value), ..
+            } => {
                 self.collect_expr(value);
             }
             Stmt::Assignment { value, .. } => {
@@ -153,7 +156,9 @@ impl DefCollector {
                 self.collect_block(body);
                 self.pop_scope();
             }
-            Expr::For { var, body, span, .. } => {
+            Expr::For {
+                var, body, span, ..
+            } => {
                 self.push_scope();
                 self.add(var.clone(), name_span_from(span, var));
                 self.collect_block(body);
@@ -350,7 +355,10 @@ fn collect_stmt_refs(stmt: &Stmt, name: &str, refs: &mut Vec<Span>) {
         Stmt::CircuitDecl { body, .. } => collect_block_refs(body, name, refs),
         Stmt::Export { inner, .. } => collect_stmt_refs(inner, name, refs),
         Stmt::Expr(expr) => collect_expr_refs(expr, name, refs),
-        Stmt::Print { value, .. } | Stmt::Return { value: Some(value), .. } => {
+        Stmt::Print { value, .. }
+        | Stmt::Return {
+            value: Some(value), ..
+        } => {
             collect_expr_refs(value, name, refs);
         }
         _ => {}
@@ -394,7 +402,9 @@ fn collect_expr_refs(expr: &Expr, name: &str, refs: &mut Vec<Span>) {
             }
         }
         Expr::For { body, .. } => collect_block_refs(body, name, refs),
-        Expr::While { condition, body, .. } => {
+        Expr::While {
+            condition, body, ..
+        } => {
             collect_expr_refs(condition, name, refs);
             collect_block_refs(body, name, refs);
         }

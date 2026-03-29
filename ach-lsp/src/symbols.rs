@@ -212,8 +212,7 @@ mod tests {
 
     #[test]
     fn extracts_named_prove() {
-        let symbols =
-            document_symbols("prove membership(root: Public) { assert_eq(root, root) }");
+        let symbols = document_symbols("prove membership(root: Public) { assert_eq(root, root) }");
         assert_eq!(symbols.len(), 1);
         assert_eq!(symbols[0].name, "membership");
         assert_eq!(symbols[0].kind, SymbolKind::EVENT);

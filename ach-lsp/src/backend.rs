@@ -192,11 +192,11 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset =
-            match definitions::position_to_byte_offset(&text, pos.line, pos.character) {
-                Some(o) => o,
-                None => return Ok(None),
-            };
+        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
+        {
+            Some(o) => o,
+            None => return Ok(None),
+        };
 
         let range = match definitions::goto_definition(&text, byte_offset) {
             Some(r) => r,
@@ -251,11 +251,11 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset =
-            match definitions::position_to_byte_offset(&text, pos.line, pos.character) {
-                Some(o) => o,
-                None => return Ok(None),
-            };
+        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
+        {
+            Some(o) => o,
+            None => return Ok(None),
+        };
 
         match definitions::prepare_rename(&text, byte_offset) {
             Some((range, _)) => Ok(Some(PrepareRenameResponse::Range(range))),
@@ -276,11 +276,11 @@ impl LanguageServer for Backend {
             None => return Ok(None),
         };
 
-        let byte_offset =
-            match definitions::position_to_byte_offset(&text, pos.line, pos.character) {
-                Some(o) => o,
-                None => return Ok(None),
-            };
+        let byte_offset = match definitions::position_to_byte_offset(&text, pos.line, pos.character)
+        {
+            Some(o) => o,
+            None => return Ok(None),
+        };
 
         let edits = definitions::rename(&text, byte_offset, &new_name);
         if edits.is_empty() {
