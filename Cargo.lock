@@ -18,14 +18,28 @@ name = "ach-lsp-core"
 version = "0.2.0-beta.17"
 dependencies = [
  "achronyme-parser",
+ "circom",
+ "diagnostics",
  "serde",
  "serde_json",
 ]
 
 [[package]]
 name = "achronyme-parser"
-version = "0.1.0-beta.17"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#63e4c10b768f6e294f28d171422ad9c0ac585213"
+version = "0.1.0-beta.19"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#b1274bcd16a78d9df89cfb19220228a4c7d46a71"
+dependencies = [
+ "diagnostics",
+]
+
+[[package]]
+name = "bincode"
+version = "1.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "bitflags"
@@ -52,6 +66,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
+name = "circom"
+version = "0.1.0-beta.19"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#b1274bcd16a78d9df89cfb19220228a4c7d46a71"
+dependencies = [
+ "diagnostics",
+ "ir",
+ "memory",
+]
+
+[[package]]
+name = "constraints"
+version = "0.1.0-beta.19"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#b1274bcd16a78d9df89cfb19220228a4c7d46a71"
+dependencies = [
+ "memory",
+ "serde_json",
+]
+
+[[package]]
 name = "crossbeam-utils"
 version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -70,6 +103,11 @@ dependencies = [
  "once_cell",
  "parking_lot_core",
 ]
+
+[[package]]
+name = "diagnostics"
+version = "0.1.0-beta.19"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#b1274bcd16a78d9df89cfb19220228a4c7d46a71"
 
 [[package]]
 name = "errno"
@@ -181,6 +219,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
 
 [[package]]
+name = "ir"
+version = "0.1.0-beta.19"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#b1274bcd16a78d9df89cfb19220228a4c7d46a71"
+dependencies = [
+ "achronyme-parser",
+ "bincode",
+ "constraints",
+ "diagnostics",
+ "memory",
+ "resolve",
+ "serde",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -219,6 +271,14 @@ name = "memchr"
 version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
+
+[[package]]
+name = "memory"
+version = "0.1.0-beta.19"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#b1274bcd16a78d9df89cfb19220228a4c7d46a71"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "mio"
@@ -317,6 +377,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "resolve"
+version = "0.1.0-beta.19"
+source = "git+https://github.com/achronyme/achronyme.git?branch=main#b1274bcd16a78d9df89cfb19220228a4c7d46a71"
+dependencies = [
+ "achronyme-parser",
 ]
 
 [[package]]
