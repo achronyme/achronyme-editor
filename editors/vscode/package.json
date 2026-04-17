@@ -1,8 +1,8 @@
 {
   "name": "achronyme",
   "displayName": "Achronyme",
-  "description": "Language support for Achronyme (.ach) — ZK cryptography DSL",
-  "version": "0.2.0-beta.17",
+  "description": "Language support for Achronyme (.ach) and imported Circom (.circom) — ZK cryptography DSL",
+  "version": "0.2.0-beta.18",
   "license": "GPL-3.0-only",
   "publisher": "achronyme",
   "repository": {
@@ -16,7 +16,8 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:achronyme"
+    "onLanguage:achronyme",
+    "onLanguage:circom"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -31,6 +32,17 @@
           ".ach"
         ],
         "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "circom",
+        "aliases": [
+          "Circom",
+          "circom"
+        ],
+        "extensions": [
+          ".circom"
+        ],
+        "configuration": "./language-configuration-circom.json"
       }
     ],
     "grammars": [
@@ -38,6 +50,11 @@
         "language": "achronyme",
         "scopeName": "source.ach",
         "path": "./syntaxes/achronyme.tmLanguage.json"
+      },
+      {
+        "language": "circom",
+        "scopeName": "source.circom",
+        "path": "./syntaxes/circom.tmLanguage.json"
       }
     ],
     "commands": [

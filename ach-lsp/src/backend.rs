@@ -17,12 +17,23 @@ impl Backend {
     }
 
     async fn publish_diagnostics_for(&self, uri: Uri, text: &str) {
-        let (_program, errors) = achronyme_parser::parse_program(text);
-        let diagnostics: Vec<Diagnostic> =
+        // Pick the pipeline by file extension. `.circom` goes through the
+        // circom parser + constraint analyzer (E100-E102 / W101-W103);
+        // everything else flows through the `.ach` parser. Matching on
+        // the URI path suffix is cheap and avoids a content-sniffing
+        // heuristic that could false-positive on `.ach` code that
+        // happens to look circom-ish.
+        let is_circom = uri.as_str().ends_with(".circom");
+
+        let core_diags = if is_circom {
+            ach_lsp_core::diagnostics_circom::check_circom(text)
+        } else {
+            let (_program, errors) = achronyme_parser::parse_program(text);
             ach_lsp_core::diagnostics::map_diagnostics(&errors, text)
-                .into_iter()
-                .map(convert::diagnostic)
-                .collect();
+        };
+
+        let diagnostics: Vec<Diagnostic> =
+            core_diags.into_iter().map(convert::diagnostic).collect();
 
         self.client
             .publish_diagnostics(uri, diagnostics, None)

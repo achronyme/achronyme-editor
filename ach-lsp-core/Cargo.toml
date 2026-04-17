@@ -1,11 +1,20 @@
 [package]
 name = "ach-lsp-core"
-version = "0.2.0-beta.17"
+version = "0.2.0-beta.18"
 edition = "2021"
 license = "GPL-3.0-only"
 description = "Core LSP logic for Achronyme: diagnostics, completions, hover, definitions, symbols. No tower-lsp dependency — compiles to WASM."
 
+[features]
+default = ["circom"]
+# Enable diagnostics for .circom files. Pulls the `circom` + `diagnostics`
+# crates from the achronyme workspace. Disable for browser/WASM builds
+# where the extra code size isn't worth it.
+circom = ["dep:circom", "dep:diagnostics"]
+
 [dependencies]
 achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", branch = "main" }
+circom = { git = "https://github.com/achronyme/achronyme.git", branch = "main", optional = true }
+diagnostics = { git = "https://github.com/achronyme/achronyme.git", branch = "main", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

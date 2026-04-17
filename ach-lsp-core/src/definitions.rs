@@ -180,7 +180,7 @@ impl DefCollector {
             Expr::While { body, .. } | Expr::Forever { body, .. } => {
                 self.collect_block(body);
             }
-            Expr::Block(b) => self.collect_block(b),
+            Expr::Block { block, .. } => self.collect_block(block),
             Expr::Call { callee, args, .. } => {
                 self.collect_expr(callee);
                 for arg in args {
@@ -367,7 +367,7 @@ fn collect_stmt_refs(stmt: &Stmt, name: &str, refs: &mut Vec<Span>) {
 
 fn collect_expr_refs(expr: &Expr, name: &str, refs: &mut Vec<Span>) {
     match expr {
-        Expr::Ident { name: n, span } if n == name => {
+        Expr::Ident { name: n, span, .. } if n == name => {
             refs.push(span.clone());
         }
         Expr::Call { callee, args, .. } => {
@@ -409,7 +409,7 @@ fn collect_expr_refs(expr: &Expr, name: &str, refs: &mut Vec<Span>) {
             collect_block_refs(body, name, refs);
         }
         Expr::Forever { body, .. } => collect_block_refs(body, name, refs),
-        Expr::Block(b) => collect_block_refs(b, name, refs),
+        Expr::Block { block, .. } => collect_block_refs(block, name, refs),
         Expr::Prove { body, .. } => collect_block_refs(body, name, refs),
         Expr::FnExpr { body, .. } => collect_block_refs(body, name, refs),
         Expr::Array { elements, .. } => {

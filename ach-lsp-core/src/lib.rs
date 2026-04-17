@@ -8,6 +8,8 @@
 pub mod completion;
 pub mod definitions;
 pub mod diagnostics;
+#[cfg(feature = "circom")]
+pub mod diagnostics_circom;
 pub mod document;
 pub mod hover;
 pub mod symbols;

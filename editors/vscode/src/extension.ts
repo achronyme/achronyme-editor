@@ -31,7 +31,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
   };
 
   const clientOptions: LanguageClientOptions = {
-    documentSelector: [{ scheme: "file", language: "achronyme" }],
+    documentSelector: [
+      { scheme: "file", language: "achronyme" },
+      { scheme: "file", language: "circom" },
+    ],
   };
 
   client = new LanguageClient(
