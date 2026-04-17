@@ -2,7 +2,7 @@
   "name": "achronyme",
   "displayName": "Achronyme",
   "description": "Language support for Achronyme (.ach) and imported Circom (.circom) — ZK cryptography DSL",
-  "version": "0.2.0-beta.17",
+  "version": "0.2.0-beta.18",
   "license": "GPL-3.0-only",
   "publisher": "achronyme",
   "repository": {
