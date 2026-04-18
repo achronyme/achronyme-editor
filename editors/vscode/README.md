@@ -74,4 +74,4 @@ fn main() {
 
 ## License
 
-GPL-3.0
+Apache-2.0 — see the [LICENSE](../../LICENSE) in the repository root.
