@@ -117,6 +117,45 @@ jobs:
           name: vsix
           path: dist/*.vsix
 
+  publish:
+    name: Publish to VS Marketplace
+    needs: package
+    runs-on: ubuntu-latest
+    # Skip the marketplace push for pre-release tags that aren't yet
+    # ready for public listing. To opt out of a single tag, push with
+    # `[skip publish]` in the annotated tag message.
+    if: ${{ !contains(github.event.head_commit.message, '[skip publish]') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download VSIX artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+          path: dist
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Publish each platform VSIX
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [ -z "${VSCE_PAT}" ]; then
+            echo "::error::VSCE_PAT secret is not set; configure it in repo settings before tagging."
+            exit 1
+          fi
+          shopt -s nullglob
+          for vsix in dist/*.vsix; do
+            echo "::notice::publishing ${vsix}"
+            vsce publish --packagePath "${vsix}" -p "${VSCE_PAT}"
+          done
+
   release:
     name: Create Release
     needs: package
