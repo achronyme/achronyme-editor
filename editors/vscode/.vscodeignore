@@ -1,5 +1,11 @@
+# Source / build inputs — out/ is the bundled artefact vsce ships.
 src/**
-node_modules/**
 tsconfig.json
 esbuild.mjs
+
+# Dev tooling.
+node_modules/**
 .gitignore
+
+# Map files — useful in dev, dead weight in the published VSIX.
+out/**/*.map

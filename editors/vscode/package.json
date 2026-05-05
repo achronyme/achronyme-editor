@@ -4,11 +4,27 @@
   "description": "Language support for Achronyme (.ach) and imported Circom (.circom) — ZK cryptography DSL",
   "version": "0.2.0-beta.20",
   "license": "Apache-2.0",
-  "publisher": "achronyme",
+  "publisher": "eddndev",
+  "icon": "icons/achronyme.png",
+  "homepage": "https://achrony.me",
+  "bugs": {
+    "url": "https://github.com/achronyme/achronyme-editor/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/achronyme/achronyme-editor"
   },
+  "keywords": [
+    "achronyme",
+    "circom",
+    "zero-knowledge",
+    "zk",
+    "zk-snark",
+    "groth16",
+    "halo2",
+    "cryptography",
+    "dsl"
+  ],
   "engines": {
     "vscode": "^1.85.0"
   },
