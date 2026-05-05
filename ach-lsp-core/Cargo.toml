@@ -1,6 +1,6 @@
 [package]
 name = "ach-lsp-core"
-version = "0.2.0-beta.18"
+version = "0.2.0-beta.20"
 edition = "2021"
 license = "Apache-2.0"
 description = "Core LSP logic for Achronyme: diagnostics, completions, hover, definitions, symbols. No tower-lsp dependency — compiles to WASM."
