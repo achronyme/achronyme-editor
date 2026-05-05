@@ -27,6 +27,172 @@ pub fn snippet_completions() -> Vec<CompletionItem> {
     items
 }
 
+/// Build completion items for `.circom` keywords. Independent from
+/// [`keyword_completions`] because the keyword sets only partially
+/// overlap (`signal`, `template`, `component`, `pragma` are circom-only;
+/// `let`, `mut`, `fn`, `circuit` are achronyme-only).
+pub fn circom_keyword_completions() -> Vec<CompletionItem> {
+    [
+        "pragma",
+        "include",
+        "template",
+        "component",
+        "signal",
+        "input",
+        "output",
+        "function",
+        "var",
+        "for",
+        "while",
+        "if",
+        "else",
+        "return",
+        "main",
+        "public",
+    ]
+    .into_iter()
+    .map(|kw| CompletionItem {
+        label: kw.to_string(),
+        kind: CompletionKind::Keyword,
+        detail: None,
+        insert_text: None,
+        insert_text_format: InsertTextFormat::PlainText,
+    })
+    .collect()
+}
+
+/// Snippet completions tailored for `.circom` source — template
+/// scaffolding, signal declarations, constraint operators, and the
+/// circomlib templates the achronyme front-end has been verified
+/// against.
+pub fn circom_snippet_completions() -> Vec<CompletionItem> {
+    let snippets: &[(&str, &str, &str, CompletionKind)] = &[
+        (
+            "pragma",
+            "pragma circom 2.0.0;\n",
+            "Required version directive at the top of every .circom file",
+            CompletionKind::Snippet,
+        ),
+        (
+            "template",
+            "template ${1:Name}(${2:n}) {\n\tsignal input ${3:in};\n\tsignal output ${4:out};\n\t$0\n}",
+            "Define a parametric template",
+            CompletionKind::Snippet,
+        ),
+        (
+            "component",
+            "component main = ${1:Name}(${2:8});",
+            "Instantiate the main component",
+            CompletionKind::Snippet,
+        ),
+        (
+            "signal input",
+            "signal input ${1:name};",
+            "Declare an input signal",
+            CompletionKind::Snippet,
+        ),
+        (
+            "signal output",
+            "signal output ${1:name};",
+            "Declare an output signal",
+            CompletionKind::Snippet,
+        ),
+        (
+            "include",
+            "include \"${1:bitify.circom}\";",
+            "Include another .circom file",
+            CompletionKind::Snippet,
+        ),
+        (
+            "function",
+            "function ${1:nbits}(${2:a}) {\n\tvar n = 1;\n\twhile (n < ${2:a}) { n *= 2; }\n\treturn n;\n}",
+            "Compile-time helper function",
+            CompletionKind::Snippet,
+        ),
+        (
+            "for",
+            "for (var ${1:i} = 0; ${1:i} < ${2:n}; ${1:i}++) {\n\t$0\n}",
+            "C-style for loop (compile-time unrolled)",
+            CompletionKind::Snippet,
+        ),
+        // Constraint operators — included as snippets so users discover the
+        // three forms. Hover docs explain when to use each.
+        (
+            "<==",
+            "${1:lhs} <== ${2:rhs};",
+            "Constrain + assign (preferred): emits both `<--` and `===`",
+            CompletionKind::Snippet,
+        ),
+        (
+            "<--",
+            "${1:lhs} <-- ${2:hint_expr};",
+            "Witness hint only — assigns off-circuit, no constraint",
+            CompletionKind::Snippet,
+        ),
+        (
+            "===",
+            "${1:lhs} === ${2:rhs};",
+            "Constraint only — must already be assigned",
+            CompletionKind::Snippet,
+        ),
+        // Circomlib component instantiations — round-trip-verified through
+        // the achronyme circom front-end.
+        (
+            "Num2Bits",
+            "component ${1:n2b} = Num2Bits(${2:8});",
+            "Decompose a field element into n little-endian bits",
+            CompletionKind::Function,
+        ),
+        (
+            "LessThan",
+            "component ${1:lt} = LessThan(${2:8});",
+            "Boolean: in[0] < in[1] (n-bit inputs)",
+            CompletionKind::Function,
+        ),
+        (
+            "IsZero",
+            "component ${1:iz} = IsZero();",
+            "Boolean: in == 0",
+            CompletionKind::Function,
+        ),
+        (
+            "Poseidon",
+            "component ${1:hash} = Poseidon(${2:2});",
+            "ZK-friendly hash over BN254 (~240 constraints for Poseidon(2))",
+            CompletionKind::Function,
+        ),
+        (
+            "MiMCSponge",
+            "component ${1:hash} = MiMCSponge(${2:2}, 220, 1);",
+            "MiMC sponge hash (~3,087 constraints for the 2→1 form)",
+            CompletionKind::Function,
+        ),
+        (
+            "Pedersen",
+            "component ${1:hash} = Pedersen(${2:n});",
+            "Pedersen hash on Baby Jubjub — outputs a curve point",
+            CompletionKind::Function,
+        ),
+        (
+            "Sha256",
+            "component ${1:hash} = Sha256(${2:64});",
+            "SHA-256 — heavy (~30k constraints for SHA-256(64))",
+            CompletionKind::Function,
+        ),
+    ];
+
+    snippets
+        .iter()
+        .map(|(label, insert, detail, kind)| CompletionItem {
+            label: label.to_string(),
+            kind: *kind,
+            detail: Some(detail.to_string()),
+            insert_text: Some(insert.to_string()),
+            insert_text_format: InsertTextFormat::Snippet,
+        })
+        .collect()
+}
+
 /// Global functions (16 items). These are the only functions remaining at global scope in beta.13.
 fn builtin_completions() -> Vec<CompletionItem> {
     let builtins: &[(&str, &str, &str)] = &[
@@ -494,6 +660,66 @@ mod tests {
                 seen.insert(item.label.clone()),
                 "duplicate method name: {}",
                 item.label
+            );
+        }
+    }
+
+    #[test]
+    fn circom_keyword_completions_present() {
+        let items = circom_keyword_completions();
+        let labels: std::collections::HashSet<_> = items.iter().map(|i| i.label.clone()).collect();
+        for kw in [
+            "pragma",
+            "include",
+            "template",
+            "component",
+            "signal",
+            "input",
+            "output",
+            "function",
+            "var",
+            "main",
+        ] {
+            assert!(
+                labels.contains(kw),
+                "circom keyword completions missing `{kw}`"
+            );
+        }
+        for item in &items {
+            assert_eq!(item.kind, CompletionKind::Keyword);
+        }
+    }
+
+    #[test]
+    fn circom_snippets_cover_circomlib() {
+        let items = circom_snippet_completions();
+        let labels: std::collections::HashSet<_> = items.iter().map(|i| i.label.clone()).collect();
+        for tpl in ["Num2Bits", "LessThan", "IsZero", "Poseidon", "Sha256"] {
+            assert!(
+                labels.contains(tpl),
+                "circom snippet completions missing `{tpl}`"
+            );
+        }
+        // Constraint operators discoverable via completion
+        for op in ["<==", "<--", "==="] {
+            assert!(
+                labels.contains(op),
+                "circom snippet completions missing operator `{op}`"
+            );
+        }
+    }
+
+    #[test]
+    fn circom_completions_are_disjoint_from_ach() {
+        // `circuit`, `let`, `mut`, `import`, `export` are .ach-only.
+        let circom_labels: std::collections::HashSet<_> = circom_keyword_completions()
+            .iter()
+            .map(|i| i.label.clone())
+            .collect();
+        for ach_only in ["let", "mut", "circuit", "import", "export", "prove"] {
+            assert!(
+                !circom_labels.contains(ach_only),
+                "circom keyword completions leaked .ach-only token `{ach_only}`"
             );
         }
     }

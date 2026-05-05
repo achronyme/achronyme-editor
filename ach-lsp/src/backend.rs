@@ -109,6 +109,7 @@ impl LanguageServer for Backend {
             .uri
             .to_string();
         let pos = params.text_document_position_params.position;
+        let is_circom = uri.ends_with(".circom");
 
         let text = match self.documents.get(&uri) {
             Some(t) => t,
@@ -121,7 +122,16 @@ impl LanguageServer for Backend {
                 None => return Ok(None),
             };
 
-        let doc = match ach_lsp_core::hover::hover_for(&word) {
+        // Token semantics differ across languages — `Poseidon` inside an
+        // `.ach` `circuit` block calls the achronyme builtin, while the
+        // same identifier in a `.circom` template instantiates a
+        // circomlib component with different parameter conventions.
+        let doc = if is_circom {
+            ach_lsp_core::hover::circom_hover_for(&word)
+        } else {
+            ach_lsp_core::hover::hover_for(&word)
+        };
+        let doc = match doc {
             Some(d) => d,
             None => return Ok(None),
         };
@@ -137,17 +147,35 @@ impl LanguageServer for Backend {
 
     async fn completion(
         &self,
-        _: CompletionParams,
+        params: CompletionParams,
     ) -> tower_lsp_server::jsonrpc::Result<Option<CompletionResponse>> {
-        let mut items: Vec<CompletionItem> = ach_lsp_core::completion::keyword_completions()
-            .into_iter()
-            .map(convert::completion_item)
-            .collect();
-        items.extend(
-            ach_lsp_core::completion::snippet_completions()
+        let uri = params.text_document_position.text_document.uri.to_string();
+        let is_circom = uri.ends_with(".circom");
+
+        let items: Vec<CompletionItem> = if is_circom {
+            let mut out: Vec<CompletionItem> =
+                ach_lsp_core::completion::circom_keyword_completions()
+                    .into_iter()
+                    .map(convert::completion_item)
+                    .collect();
+            out.extend(
+                ach_lsp_core::completion::circom_snippet_completions()
+                    .into_iter()
+                    .map(convert::completion_item),
+            );
+            out
+        } else {
+            let mut out: Vec<CompletionItem> = ach_lsp_core::completion::keyword_completions()
                 .into_iter()
-                .map(convert::completion_item),
-        );
+                .map(convert::completion_item)
+                .collect();
+            out.extend(
+                ach_lsp_core::completion::snippet_completions()
+                    .into_iter()
+                    .map(convert::completion_item),
+            );
+            out
+        };
         Ok(Some(CompletionResponse::Array(items)))
     }
 

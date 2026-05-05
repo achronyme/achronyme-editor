@@ -404,6 +404,108 @@ pub fn hover_for(word: &str) -> Option<&'static str> {
     }
 }
 
+/// Hover documentation for `.circom` source. Independent table from
+/// [`hover_for`] because the tokens overlap semantically — `Poseidon`
+/// inside an `.ach` `circuit` block calls the achronyme builtin, while
+/// inside a `.circom` template it's a circomlib component instantiation
+/// with different parameter conventions.
+pub fn circom_hover_for(word: &str) -> Option<&'static str> {
+    match word {
+        // Circom keywords / structural tokens
+        "template" => Some(
+            "```circom\ntemplate Name(params) { ... }\n```\n\
+             Define a parametric circuit template. Parameters are\n\
+             compile-time constants used to size signals and unroll loops.",
+        ),
+        "component" => Some(
+            "```circom\ncomponent main = Foo(8);\ncomponent inst = Bar(n);\n```\n\
+             Instantiate a template. The `main` component is the circuit's\n\
+             entry point and binds public/witness inputs.",
+        ),
+        "signal" => Some(
+            "```circom\nsignal input  in;\nsignal output out;\nsignal       internal;\n```\n\
+             Declare a circuit signal. Inputs come from the witness, outputs\n\
+             land on the public R1CS boundary, and bare signals are\n\
+             internal wires constrained by `<==` or `===`.",
+        ),
+        "include" => Some(
+            "```circom\ninclude \"bitify.circom\";\n```\n\
+             Pull a `.circom` file into this compilation unit. The path is\n\
+             resolved against the file's own directory first, then against\n\
+             each `[circom] libs` entry in `achronyme.toml`.",
+        ),
+        "function" => Some(
+            "```circom\nfunction nbits(a) { var n = 1; while (n < a) { n *= 2; } return n; }\n```\n\
+             Compile-time helper evaluated during lowering — no constraints\n\
+             emitted. Use for parametric sizing (`nbits`, `log2`, etc.).",
+        ),
+        "var" => Some(
+            "```circom\nvar tmp = 0;\nfor (var i = 0; i < n; i++) { tmp += in[i]; }\n```\n\
+             Compile-time variable. Holds field values during template\n\
+             instantiation; never appears in the constraint system.",
+        ),
+        "pragma" => Some(
+            "```circom\npragma circom 2.0.0;\n```\n\
+             Required directive at the top of every `.circom` file.\n\
+             Declares the circom language version this file targets.",
+        ),
+
+        // Circomlib templates — round-trip-verified through the achronyme
+        // circom front-end (Poseidon, MiMCSponge, EdDSA, SHA-256 produce
+        // R1CS that matches circom 2.2.3 ± a handful of constraints).
+        "Num2Bits" => Some(
+            "```circom\ntemplate Num2Bits(n) {\n  signal input in;\n  signal output out[n];\n}\n```\n\
+             Decompose a field element into `n` little-endian bits. Each\n\
+             output bit is constrained boolean. Standard width is 254 for\n\
+             full-field decomposition.",
+        ),
+        "LessThan" => Some(
+            "```circom\ntemplate LessThan(n) {\n  signal input in[2];\n  signal output out;\n}\n```\n\
+             Boolean output: `1` if `in[0] < in[1]`, else `0`. Both inputs\n\
+             must fit in `n` bits — no automatic range check.",
+        ),
+        "IsZero" => Some(
+            "```circom\ntemplate IsZero() {\n  signal input in;\n  signal output out;\n}\n```\n\
+             Boolean output: `1` if `in == 0`, else `0`. Uses a hint signal\n\
+             to avoid a division constraint.",
+        ),
+        "Poseidon" => Some(
+            "```circom\ntemplate Poseidon(nInputs) {\n  signal input inputs[nInputs];\n  signal output out;\n}\n```\n\
+             Poseidon hash over BN254. ZK-friendly, ~240 constraints for\n\
+             `Poseidon(2)`. Use for Merkle trees and commitments inside\n\
+             circuits.",
+        ),
+        "MiMCSponge" => Some(
+            "```circom\ntemplate MiMCSponge(nInputs, nRounds, nOutputs) {\n  signal input ins[nInputs];\n  signal input k;\n  signal output outs[nOutputs];\n}\n```\n\
+             MiMC sponge hash (Feistel construction). Standard parameters:\n\
+             `MiMCSponge(2, 220, 1)` produces a 2→1 hash in ~3,087\n\
+             constraints. Used by Tornado Cash for Merkle proofs.",
+        ),
+        "Pedersen" => Some(
+            "```circom\ntemplate Pedersen(n) {\n  signal input in[n];\n  signal output out[2];\n}\n```\n\
+             Pedersen hash on Baby Jubjub. Output is a curve point\n\
+             `(x, y)`. Roughly 4 constraints per input bit; useful when\n\
+             collision resistance is needed without Poseidon's algebraic\n\
+             structure.",
+        ),
+        "EdDSAPoseidon" | "EdDSAPoseidonVerifier" => Some(
+            "```circom\ntemplate EdDSAPoseidonVerifier() {\n  signal input enabled;\n  signal input Ax; signal input Ay;\n  signal input S;  signal input R8x; signal input R8y;\n  signal input M;\n}\n```\n\
+             EdDSA signature verifier on Baby Jubjub with Poseidon as the\n\
+             hash. Constrains `S * B == R8 + Hash(R8 || A || M) * A`. Most\n\
+             expensive circomlib primitive — tens of thousands of\n\
+             constraints.",
+        ),
+        "Sha256" => Some(
+            "```circom\ntemplate Sha256(nBits) {\n  signal input in[nBits];\n  signal output out[256];\n}\n```\n\
+             SHA-256 over `nBits` input bits. ~30,000 constraints for\n\
+             SHA-256(64) — the heaviest circomlib primitive in regular\n\
+             use. Prefer Poseidon for in-circuit hashing when you can.",
+        ),
+
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -527,5 +629,75 @@ mod tests {
                 "hover for `{word}` should contain a code block"
             );
         }
+    }
+
+    #[test]
+    fn circom_keywords_have_hover() {
+        for kw in [
+            "template",
+            "component",
+            "signal",
+            "include",
+            "function",
+            "var",
+            "pragma",
+        ] {
+            assert!(
+                circom_hover_for(kw).is_some(),
+                "missing circom hover for `{kw}`"
+            );
+        }
+    }
+
+    #[test]
+    fn circomlib_templates_have_hover() {
+        for name in [
+            "Num2Bits",
+            "LessThan",
+            "IsZero",
+            "Poseidon",
+            "MiMCSponge",
+            "Pedersen",
+            "EdDSAPoseidonVerifier",
+            "Sha256",
+        ] {
+            let doc = circom_hover_for(name)
+                .unwrap_or_else(|| panic!("missing circom hover for circomlib template `{name}`"));
+            assert!(
+                doc.contains("```circom"),
+                "hover for `{name}` should contain a circom code block"
+            );
+        }
+    }
+
+    #[test]
+    fn circom_hover_doesnt_leak_ach_tokens() {
+        // `let`, `fn`, `circuit` belong to .ach, not .circom — circom hover
+        // should ignore them so the editor doesn't confuse the user with
+        // wrong-language docs.
+        for word in ["let", "fn", "circuit", "prove", "mut", "import"] {
+            assert!(
+                circom_hover_for(word).is_none(),
+                "circom hover should NOT match .ach token `{word}`"
+            );
+        }
+    }
+
+    #[test]
+    fn poseidon_hover_differs_per_language() {
+        // `Poseidon` is a builtin in .ach AND a circomlib component in
+        // .circom — the two tables must serve different docs so the
+        // editor doesn't confuse a user copy-pasting between contexts.
+        let ach = hover_for("poseidon").expect("ach hover for poseidon");
+        let circom = circom_hover_for("Poseidon").expect("circom hover for Poseidon");
+        assert_ne!(
+            ach, circom,
+            "the two languages must surface different docs for `poseidon`/`Poseidon`"
+        );
+        assert!(
+            circom.contains("```circom"),
+            "circom hover must use circom code block"
+        );
+        assert!(ach.contains("```ach"), "ach hover must use ach code block");
     }
 }
