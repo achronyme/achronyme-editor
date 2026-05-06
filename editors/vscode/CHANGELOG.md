@@ -3,6 +3,19 @@
 All notable changes to the Achronyme VS Code extension are listed here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0-beta.21]
+
+Tracks the language repo's `0.1.0-beta.21` release. No editor-facing
+behavior changes; the bump exists to pull in the upstream walker fix
+that unblocks SHA-256 imported from circomlib in `.ach prove` blocks
+(see the language repo's release notes for context).
+
+### Changed
+
+- Bumped editor crates and the extension to `0.2.0-beta.21`. Cargo
+  refs still pin `branch = "main"`; `Cargo.lock` refresh moves the
+  resolved revision from beta.20 to the beta.21 release commit.
+
 ## [0.2.0-beta.20]
 
 First Marketplace release. Brings circom support to parity with the
