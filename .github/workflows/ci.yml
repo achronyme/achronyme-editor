@@ -25,7 +25,10 @@ jobs:
             echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
             exit 0
           fi
-          channel="$(sed -n 's/^[[:space:]]*channel[[:space:]]*=[[:space:]]*"\(.*\)".*/\1/p' rust-toolchain.toml 2>/dev/null)"
+          # `|| true` so a missing rust-toolchain.toml (this repo has no
+          # pin) does not abort the step under `bash -e`; channel stays
+          # empty and the loop falls through to the second glob.
+          channel="$(sed -n 's/^[[:space:]]*channel[[:space:]]*=[[:space:]]*"\(.*\)".*/\1/p' rust-toolchain.toml 2>/dev/null || true)"
           for tc in "$HOME/.rustup/toolchains/${channel}-"* "$HOME/.rustup/toolchains/"*; do
             if [ -x "$tc/bin/cargo" ]; then
               echo "$tc/bin" >> "$GITHUB_PATH"
