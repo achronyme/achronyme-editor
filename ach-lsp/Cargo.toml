@@ -1,6 +1,6 @@
 [package]
 name = "ach-lsp"
-version = "0.2.0-beta.21"
+version = "0.2.0-beta.22"
 edition = "2021"
 license = "Apache-2.0"
 
@@ -10,7 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 ach-lsp-core = { path = "../ach-lsp-core" }
-achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", branch = "main" }
+achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", rev = "0ab27721a81283547b8c51172f72355a554bd2dc" }
 tower-lsp-server = "0.23"
 tokio = { version = "1", features = ["full"] }
 dashmap = "6"

@@ -3,6 +3,19 @@
 All notable changes to the Achronyme VS Code extension are listed here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0-beta.22]
+
+Tracks the language repo's `0.1.0-beta.22` release. No editor-facing
+behavior changes; the bump pulls in the upstream beta.22 compiler so
+in-editor `.circom` diagnostics match the shipped toolchain.
+
+### Changed
+
+- Bumped editor crates and the extension to `0.2.0-beta.22`. The Cargo
+  refs now pin an explicit `rev` at the beta.22 release commit instead
+  of `branch = "main"`, so `cargo build --locked` is reproducible and
+  the editor no longer floats onto unreleased upstream changes.
+
 ## [0.2.0-beta.21]
 
 Tracks the language repo's `0.1.0-beta.21` release. No editor-facing

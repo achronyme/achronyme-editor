@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "ach-lsp"
-version = "0.2.0-beta.21"
+version = "0.2.0-beta.22"
 dependencies = [
  "ach-lsp-core",
  "achronyme-parser",
@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "ach-lsp-core"
-version = "0.2.0-beta.21"
+version = "0.2.0-beta.22"
 dependencies = [
  "achronyme-parser",
  "circom",
@@ -26,18 +26,19 @@ dependencies = [
 
 [[package]]
 name = "achronyme-parser"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "diagnostics",
 ]
 
 [[package]]
 name = "artik"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "memory",
+ "num-bigint",
 ]
 
 [[package]]
@@ -81,8 +82,8 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "circom"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "artik",
  "diagnostics",
@@ -91,17 +92,38 @@ dependencies = [
  "memory",
  "num-bigint",
  "num-traits",
+ "rustc-hash",
 ]
 
 [[package]]
 name = "constraints"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "ir-core",
  "memory",
+ "rayon",
  "rustc-hash",
  "serde_json",
+]
+
+[[package]]
+name = "crossbeam-deque"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9dd111b7b7f7d55b72c0a6ae361660ee5853c9af73f70c3c2ef6858b950e2e51"
+dependencies = [
+ "crossbeam-epoch",
+ "crossbeam-utils",
+]
+
+[[package]]
+name = "crossbeam-epoch"
+version = "0.9.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
+dependencies = [
+ "crossbeam-utils",
 ]
 
 [[package]]
@@ -126,8 +148,14 @@ dependencies = [
 
 [[package]]
 name = "diagnostics"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
+
+[[package]]
+name = "either"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91622ff5e7162018101f2fea40d6ebf4a78bbe5a49736a2020649edf9693679e"
 
 [[package]]
 name = "equivalent"
@@ -268,8 +296,8 @@ dependencies = [
 
 [[package]]
 name = "ir"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "achronyme-parser",
  "artik",
@@ -282,14 +310,15 @@ dependencies = [
  "lysis-types",
  "memory",
  "resolve",
+ "rustc-hash",
  "serde",
  "smallvec",
 ]
 
 [[package]]
 name = "ir-core"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "diagnostics",
  "memory",
@@ -298,8 +327,8 @@ dependencies = [
 
 [[package]]
 name = "ir-forge"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "achronyme-parser",
  "bincode",
@@ -351,8 +380,8 @@ dependencies = [
 
 [[package]]
 name = "lysis"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "artik",
  "indexmap",
@@ -365,8 +394,8 @@ dependencies = [
 
 [[package]]
 name = "lysis-types"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "memory",
 ]
@@ -379,8 +408,8 @@ checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
 name = "memory"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "serde",
 ]
@@ -484,6 +513,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "rayon"
+version = "1.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb39b166781f92d482534ef4b4b1b2568f42613b53e5b6c160e24cfbfa30926d"
+dependencies = [
+ "either",
+ "rayon-core",
+]
+
+[[package]]
+name = "rayon-core"
+version = "1.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
+dependencies = [
+ "crossbeam-deque",
+ "crossbeam-utils",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -514,8 +563,8 @@ dependencies = [
 
 [[package]]
 name = "resolve"
-version = "0.1.0-beta.21"
-source = "git+https://github.com/achronyme/achronyme.git?branch=main#99c50a9998a7ea245a4bf47d0c8882be1f3e49b6"
+version = "0.1.0-beta.22"
+source = "git+https://github.com/achronyme/achronyme.git?rev=0ab27721a81283547b8c51172f72355a554bd2dc#0ab27721a81283547b8c51172f72355a554bd2dc"
 dependencies = [
  "achronyme-parser",
 ]

@@ -1,6 +1,6 @@
 [package]
 name = "ach-lsp-core"
-version = "0.2.0-beta.21"
+version = "0.2.0-beta.22"
 edition = "2021"
 license = "Apache-2.0"
 description = "Core LSP logic for Achronyme: diagnostics, completions, hover, definitions, symbols. No tower-lsp dependency — compiles to WASM."
@@ -13,8 +13,8 @@ default = ["circom"]
 circom = ["dep:circom", "dep:diagnostics"]
 
 [dependencies]
-achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", branch = "main" }
-circom = { git = "https://github.com/achronyme/achronyme.git", branch = "main", optional = true }
-diagnostics = { git = "https://github.com/achronyme/achronyme.git", branch = "main", optional = true }
+achronyme-parser = { git = "https://github.com/achronyme/achronyme.git", rev = "0ab27721a81283547b8c51172f72355a554bd2dc" }
+circom = { git = "https://github.com/achronyme/achronyme.git", rev = "0ab27721a81283547b8c51172f72355a554bd2dc", optional = true }
+diagnostics = { git = "https://github.com/achronyme/achronyme.git", rev = "0ab27721a81283547b8c51172f72355a554bd2dc", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
